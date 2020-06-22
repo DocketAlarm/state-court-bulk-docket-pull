@@ -181,7 +181,8 @@ def get_results(party_name, docketnum):
 
 @retry
 def get_docket(docket):
-
+""" Takes in a docket number as an argument and returns all the JSON data
+    available from Docket Alarm."""
     getdocket_url = "https://www.docketalarm.com/api/v1/getdocket/"
 
     data = {
