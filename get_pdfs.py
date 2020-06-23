@@ -4,6 +4,10 @@ from progress.bar import IncrementalBar
 import requests
 
 def download_pdfs():
+    """ Scans through JSON files in results folder,
+        downloads any PDF links listed in the JSON data,
+        and outputs the PDF's to the result_filtered folder
+    """
     directory = os.path.join(os.getcwd(), 'result')
     max = len(os.listdir(directory))
     bar = IncrementalBar("Gathering Links", max=max)
