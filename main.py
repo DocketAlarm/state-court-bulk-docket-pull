@@ -66,15 +66,21 @@ import auth
 # or if you want to search within a different court.
 court = "Florida State, Duval County, Fourth Circuit Court"
 spreadsheet = "death-penalty-project.csv"
-isCached = False
+isCached = True
 
-def writeToJSONFile(folder, fileName, data):
+def write_to_json_file(folder, fileName, data):
     """ takes in the name of a folder in the current directory, the name of
         the file you want to create, and the json object you want to write to
         the file.
     """ 
+    # Created the path where our .json file will be saved to
     filePathNameWExt = os.path.join( os.getcwd(), folder, fileName + '.json')
+
+    # When 'opening' a file that doesn't yet exist, we create that file.
+    # Here, we create the json file we'll be saving the data to.
     with open(filePathNameWExt, 'w') as fp:
+
+        # Then we write the data to the newly created .json file.
         json.dump(data,fp)
 
 def authenticate():
@@ -82,27 +88,41 @@ def authenticate():
        Make sure that auth.py is filled out!
     """
 
+    # This is the endpoint for logging in to Docket Alarm from the API.
     login_url = "https://www.docketalarm.com/api/v1/login/"
 
-
+    # The data we will send to the endpoint with our post request will be
+    # our Docket Alarm username and password.
     data = {
         'username':auth.username,
         'password':auth.password,
         }
 
+    # We save the response to a variable. The response is a json object containing
+    # our authentication key iside the json key named 'login_token'
     result = requests.post(login_url, data=data)
 
-
+    # Calling the .json() method on the result turns it into a python dictionary we
+    # can work with natively.
     result_json = result.json()
 
+    # We go into the 'login_token' key in our dictionary. The value we save here to
+    # this variable is our authentication key.
     login_token = result_json['login_token']
 
+    # We have the function return the key so this function can be called wherever we need
+    # the key.
     return login_token
 
 
 def list_courts():
     """Prints all the courts to the console and returns a list of courts
     """
+
+    # Sending a get request to the /searchdirect/ endpoint with only the login_token and
+    # client matter will return a list of couthouses. This list is every court we can search,
+    # with the name formatted in a way that we can send later when accessing the API for 
+    # searching for dockets.
     searchdirect_url = "https://www.docketalarm.com/api/v1/searchdirect/"
 
     data = {
@@ -110,17 +130,24 @@ def list_courts():
         'client_matter':auth.client_matter,
     }
 
+    # returns a json object
     result = requests.get(searchdirect_url, data)
 
 
-
+    # We call the .json() method on the json object to turn it into a python dictionary
     result_json = result.json()
 
+    # The list of courts is stored in the 'courts' key we assign to a variable here
     courts = result_json['courts']
+
+    # Uncomment out the 2 lines below to have the courts print to the console when calling
+    # this function
 
     # for court in courts:
     #     print(court + "\n")
 
+
+    # The function call returns a list object with all the courts we can search with Docket Alarm
     return courts
 
 
@@ -208,6 +235,11 @@ def format_case_number(unformatted_case_number):
         provided, and returns the same number in a
         form that Docket Alarm can search for.
     """
+
+    # Takes in a regular expression as the first argument and the string you
+    # want to search through as the second argument. returns a list, where
+    # index 0 is the whole string, and index 1 is the part captured
+    # in the parentheses of the regex
     regex = re.search(r"^\d\d-(\d\d\d\d-CF-\d+)-?", unformatted_case_number)
     result = regex[1]
     return result
@@ -215,21 +247,47 @@ def format_case_number(unformatted_case_number):
 def loop_dataframe():
     """ loops through the spreadsheet listed in the global variable toward the top of
         this script. Returns docket info from each."""
+
+    # We turn the csv in our current directory into a DataFrame object. This is
+    # an object representing tabular data that can comfortably be manipulated and
+    # accessed in python.
     df = pd.read_csv(spreadsheet)
+
+    # We declare a new variable that represents the amount of rows in the DataFrame.
+    # We use this when we add our loading bar, to tell it what the max number of
+    # loops is.
     len_df = len(df)
+
+    # Here we display the loading bar on the console.
     bar = ShadyBar('Processing', max=len_df)
+
+    # We loops through each row in the pandas dataframe
     for index, row in df.iterrows():
+
+        # During each run through the loop, we grab the values from each column and
+        # save them to variables.
         lastName = row[0]
         firstName = row[1]
         county = row[5]
         caseNo = row[6]
         
+        # We use our regular expression from earlier to change the format of the case number
+        # into something Docket Alarm recognizes natively.
         formatted_caseNo = format_case_number(caseNo)
 
+        #We run get_docket() on each docket number in the loop, which returns the dictionary
+        # of that individual docket's json data. We save it to a variable.
         docket = get_docket(formatted_caseNo)
-        writeToJSONFile('result', f"{lastName} {formatted_caseNo}", docket)
+
+        # We save the json files and set their individual filenames to be the last name of the
+        # party followed by the docket number
+        write_to_json_file('result', f"{lastName} {formatted_caseNo}", docket)
+
+        # With each loop, the progress bar moves forward.
         bar.next()
+
+    # Forces the progress bar to 100%
     bar.finish()    
 
-
+# Makes it so loop_dataframe() runs when this main.py file is ran
 loop_dataframe()
