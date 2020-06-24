@@ -2,7 +2,8 @@
 ## Getting Started
 
 The first thing you need to do is enter your user authentication information.
-Go into _auth.py and enter the username and password for your Docket Alarm account.
+Go into auth.example.py and enter the username and password for your Docket Alarm account.
+Change the name of the file to simply "auth.py"
 
 Next, make sure you have a .csv file full of docket numbers in the same directory as main.py.
 Go into main.py and make sure the 'spreadsheet' variable specifies the name of the csv you want to
@@ -17,7 +18,7 @@ Then, just run main.py and the program will begin making api calls based on what
 
 ## The Files:
 
-### _auth.py
+### auth.example.py
 
 The first place you'll need to go before experimenting with this script.
 You need to enter your Docket Alarm login information here.
@@ -45,7 +46,7 @@ Where your JSON files will appear when you run the main.py script.
 
 This is the file used to launch the program. It contains a variety of functions:
 
-#### writeToJSONFile(folder, fileName, data)
+#### write_to_json_file(folder, fileName, data)
 
 takes in the name of a folder in the current directory, the name of
 the file you want to create, and the json object you want to write to
