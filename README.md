@@ -1,4 +1,18 @@
 # State Court Bulk Docket Pull
+## Getting Started
+
+The first thing you need to do is enter your user authentication information.
+Go into _auth.py and enter the username and password for your Docket Alarm account.
+
+Next, make sure you have a .csv file full of docket numbers in the same directory as main.py.
+Go into main.py and make sure the 'spreadsheet' variable specifies the name of the csv you want to
+run the API calls on.
+
+You can adjust the other global variabled to specify the court you are trying to search, and whether
+or not you want to search for the cached version of the dockets (Searching uncached may result in charges to your
+Docket Alarm account).
+
+Then, just run main.py and the program will begin making api calls based on what is contained within your spreadsheet.
 
 
 ## The Files:
@@ -9,6 +23,23 @@ The first place you'll need to go before experimenting with this script.
 You need to enter your Docket Alarm login information here.
 When you aredone, rename it to "auth.py" by removing the underscore,
 and you are ready to go!
+
+
+
+### death-penalty-project.csv
+
+The example csv file used. Feel free to change the file and tweak the script to 
+suit your own use case!
+
+### JSON files.zip
+
+A backup of the 'result' folder from when I ran this script with isCached=True on 6/22/20.
+This contains all the cases specified in the spreadsheet as JSON files.
+
+### result folder
+
+Where your JSON files will appear when you run the main.py script.
+
 
 ### main.py
 
@@ -55,17 +86,3 @@ form that Docket Alarm can search for.
 
 loops through the spreadsheet listed in the global variable toward the top of
 this script. Returns docket info from each.
-
-### death-penalty-project.csv
-
-The example csv file used. Feel free to change the file and tweak the script to 
-suit your own use case!
-
-### JSON files.zip
-
-A backup of the 'result' folder from when I ran this script with isCached=True on 6/22/20.
-This contains all the cases specified in the spreadsheet as JSON files.
-
-### result folder
-
-Where your JSON files will appear when you run the main.py script.
