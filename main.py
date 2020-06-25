@@ -49,7 +49,7 @@ Press ENTER for options.
     """
     print(instructions)
     input()
-    os.system('cls' if os.name == 'nt' else 'clear')
+    clear()
 
     options = """
 Type in one of the following numbers and press ENTER to specify your choice:

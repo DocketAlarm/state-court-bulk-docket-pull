@@ -2,3 +2,5 @@
 /auth.py
 /log.txt
 /__pycache__
+/.pyc
+.pyc

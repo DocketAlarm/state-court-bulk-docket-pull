@@ -136,7 +136,7 @@ def get_parameters():
 
     data = {
         'login_token':authenticate(),
-        'client_matter': client_matter,
+        'client_matter': config.client_matter,
         'court': config.court
     }
 
@@ -158,7 +158,7 @@ def get_results(party_name, docketnum):
 
     data = {
         'login_token':authenticate(),
-        'client_matter':client_matter,
+        'client_matter':config.client_matter,
         'party_name':party_name,
         'docketnum':docketnum,
         'court': config.court,
