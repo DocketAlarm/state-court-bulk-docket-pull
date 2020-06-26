@@ -1,5 +1,5 @@
-import config
-import auth
+from config import config
+from config import auth
 
 
 # Module for working with tabular data like csv and excel files.
@@ -142,7 +142,7 @@ def loop_dataframe():
     # an object representing tabular data that can comfortably be manipulated and
     # accessed in python.
 
-    spreadsheet_path = os.path.join(config.cwd, config.spreadsheet)
+    spreadsheet_path = os.path.join(config.cwd,'csv', config.spreadsheet)
 
     df = pd.read_csv(spreadsheet_path)
 
