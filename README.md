@@ -2,18 +2,14 @@
 ## Getting Started
 
 The first thing you need to do is enter your user authentication information.
-Go into auth.example.py and enter the username and password for your Docket Alarm account.
+Go into auth.example.py inside the 'config' folder and enter the username and password for your Docket Alarm account.
 Change the name of the file to simply "auth.py"
 
-Next, make sure you have a .csv file full of docket numbers in the same directory as main.py.
-Go into main.py and make sure the 'spreadsheet' variable specifies the name of the csv you want to
-run the API calls on.
+Next, go to the input.example.csv file in the 'csv' folder. Fill this out with the information for any dockets you
+want to pull. You will need to select courts from the courts.txt file to enter into the csv. Copy and paste them
+so they will be included exactly as they are written in courts.txt. Rename input.example.csv to simply: input.csv.
 
-You can adjust the other global variabled to specify the court you are trying to search, and whether
-or not you want to search for the cached version of the dockets (Searching uncached may result in charges to your
-Docket Alarm account).
-
-Then, just run main.py and the program will begin making api calls based on what is contained within your spreadsheet.
+Then, just run main.py and follow the instructions.
 
 
 ## The Files:
