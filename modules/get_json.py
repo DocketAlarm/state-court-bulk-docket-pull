@@ -92,94 +92,7 @@ def authenticate():
     return login_token
 
 
-def list_courts():
-    """Prints all the courts to the console and returns a list of courts
-    """
 
-    # Sending a get request to the /searchdirect/ endpoint with only the login_token and
-    # client matter will return a list of couthouses. This list is every court we can search,
-    # with the name formatted in a way that we can send later when accessing the API for 
-    # searching for dockets.
-    searchdirect_url = "https://www.docketalarm.com/api/v1/searchdirect/"
-
-    data = {
-        'login_token':authenticate(),
-        'client_matter': auth.client_matter,
-    }
-
-    # returns a json object
-    result = requests.get(searchdirect_url, data)
-
-
-    # We call the .json() method on the json object to turn it into a python dictionary
-    result_json = result.json()
-
-    # The list of courts is stored in the 'courts' key we assign to a variable here
-    courts = result_json['courts']
-
-    # Uncomment out the 2 lines below to have the courts print to the console when calling
-    # this function
-
-    # for court in courts:
-    #     print(court + "\n")
-
-
-    # The function call returns a list object with all the courts we can search with Docket Alarm
-    return courts
-
-
-def get_parameters():
-    """Returns all of the parameters you can use when making a post 
-        request to the /searchdirect endpoint
-    """
-    searchdirect_url = "https://www.docketalarm.com/api/v1/searchdirect/"
-
-    data = {
-        'login_token':authenticate(),
-        'client_matter': config.client_matter,
-        'court': config.court
-    }
-
-    result = requests.get(searchdirect_url, data)
-
-
-
-    result_json = result.json()
-
-    return result_json
-
-def get_results(party_name, docketnum):
-    """ Takes in the name of a party and the docket number as a parameter,
-        returns the Docket Alarm search results. You can make calls to the
-        /getdocket endpoint with these results to get more detailed information
-        on the docket you are looking for.
-    """
-    searchdirect_url = "https://www.docketalarm.com/api/v1/searchdirect/"
-
-    data = {
-        'login_token':authenticate(),
-        'client_matter':config.client_matter,
-        'party_name':party_name,
-        'docketnum':docketnum,
-        'court': config.court,
-        'case_type':'CF',
-
-    }
-    
-    result = requests.post(searchdirect_url, data)
-
-    result_json = result.json()
-
-    search_results = None
-
-    if result_json['success']:
-        search_results = result_json['search_results']
-    else:
-        search_results = None
-    
-
-    # print(result_json)
-    return search_results
 
 @retry
 def get_docket(docket):
@@ -251,18 +164,30 @@ def loop_dataframe():
         county = row[5]
         caseNo = row[6]
         
-        # We use our regular expression from earlier to change the format of the case number
-        # into something Docket Alarm recognizes natively.
-        formatted_caseNo = format_case_number(caseNo)
+
+        # Here we set up the logic to specify if we want to format the case numbers or not.
+        # Config.py has a 'formatCaseNos' variable set to a boolean. If it's True, we
+        # run the case numbers through a regular expression. If False, it runs the script
+        # on the case numbers provided as is.
+        if config.formatCaseNos == True:
+            caseNo = format_case_number(caseNo)
+        elif config.formatCaseNos == False:
+            caseNo = row[6]
+        else:
+            # If for some reason the 'formatCaseNos' variable is not set, we default on the
+            # case numbers provided in the spreadsheet.
+            caseNo = caseNo
+        
+
 
         #We run get_docket() on each docket number in the loop, which returns the dictionary
         # of that individual docket's json data. We save it to a variable.
-        docket = get_docket(formatted_caseNo)
+        docket = get_docket(caseNo)
 
         # We save the json files and set their individual filenames to be the last name of the
         # party followed by the docket number
 
-        write_to_json_file('json-output', f"{lastName} {formatted_caseNo}", docket)
+        write_to_json_file('json-output', f"{lastName} {caseNo}", docket)
 
         # With each loop, the progress bar moves forward.
         bar.next()
@@ -270,5 +195,3 @@ def loop_dataframe():
     # Forces the progress bar to 100%
     bar.finish()    
 
-# Makes it so loop_dataframe() runs when this main.py file is ran
-# loop_dataframe()

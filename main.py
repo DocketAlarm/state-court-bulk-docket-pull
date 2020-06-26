@@ -28,6 +28,7 @@ def clear():
     os.system('cls' if os.name == 'nt' else 'clear')
 
 def welcome():
+    clear()
     print(msg)
     print(Style.RESET_ALL)
     print("\n")

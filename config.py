@@ -18,3 +18,9 @@ isCached = True
 # best not to change it.
 cwd = f"{os.getcwd()}"
 
+# This global variable also should not be changed unless you know for sure it suits
+# your use case. In some situations, the case numbers provided may not come in a
+# format that Docket Alarm recognizes. If this is set to True, then the program
+# will attempt to reformat those case numbers.
+formatCaseNos = False
+
