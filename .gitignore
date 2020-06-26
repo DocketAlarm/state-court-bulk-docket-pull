@@ -4,3 +4,5 @@
 /__pycache__
 /*.pyc
 *.pyc
+modules/__pycache__/get_json.cpython-38.pyc
+modules/__pycache__/get_pdfs.cpython-38.pyc
