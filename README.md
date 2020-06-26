@@ -1,7 +1,10 @@
 # State Court Bulk Docket Pull
 ## Getting Started
 
-The first thing you need to do is enter your user authentication information.
+To begin, enter the docs folder and open requirements.txt. This file lists all the dependencies for this project.
+You will need to install all of these packages before the program can run.
+
+Now you need to do is enter your user authentication information.
 Go into auth.example.py inside the 'config' folder and enter the username and password for your Docket Alarm account.
 Change the name of the file to simply "auth.py"
 
