@@ -2,6 +2,8 @@ import os
 import json
 from progress.bar import IncrementalBar
 import requests
+import config
+
 
 def download_pdfs():
     """ Scans through JSON files in results folder,
@@ -10,13 +12,13 @@ def download_pdfs():
     """
 
     # The absolute path of the 'result' folder
-    directory = os.path.join(os.getcwd(), 'result')
+    directory = os.path.join(config.cwd, 'json-output')
 
     # The amount of files in the 'result' folder. Used for the loading bar.
     max = len(os.listdir(directory))
 
     # Creates a loading bar
-    bar = IncrementalBar("Gathering Links", max=max)
+    bar = IncrementalBar("Downloading PDFs", max=max)
 
     # Loops through every file in the 'result' directory.
     for file in os.listdir(directory):
@@ -69,11 +71,11 @@ def download_pdfs():
                             # String variable that represents the absolute path complete with the filename we will be saving to.
                             # It saves in a folder named after the original JSON file and the PDF will be named after it's 
                             # corresponding document number.
-                            pathname = os.path.join(os.getcwd(),'result_filtered', base_filename, filename)
+                            pathname = os.path.join(config.cwd,'pdf-output', base_filename, filename)
 
                             # The same as above, but this variable only lists the path to the directory we will be saving it.
                             # We create this variable to check for the existence of this directory and create it if it does not exist.
-                            dirpath = os.path.join(os.getcwd(),'result_filtered', base_filename)
+                            dirpath = os.path.join(config.cwd,'pdf-output', base_filename)
 
                             # If the folder does not exist...
                             if not os.path.exists(dirpath):
@@ -122,4 +124,5 @@ def download_pdfs():
             continue
         else:
             continue
+        
 
