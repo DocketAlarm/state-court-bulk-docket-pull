@@ -1,5 +1,5 @@
-import config
-import auth
+from config import config
+from config import auth
 
 
 # Module for working with tabular data like csv and excel files.
@@ -95,7 +95,7 @@ def authenticate():
 
 
 @retry
-def get_docket(docket):
+def get_docket(docket, caseCourt):
     """ Takes in a docket number as an argument and returns all the JSON data available from Docket Alarm.
     """
     getdocket_url = "https://www.docketalarm.com/api/v1/getdocket/"
@@ -103,7 +103,7 @@ def get_docket(docket):
     data = {
         'login_token':authenticate(),
         'client_matter': auth.client_matter,
-        'court': config.court,
+        'court': caseCourt,
         'docket':docket,
         'cached': config.isCached,
         'normalize':True,
@@ -142,7 +142,7 @@ def loop_dataframe():
     # an object representing tabular data that can comfortably be manipulated and
     # accessed in python.
 
-    spreadsheet_path = os.path.join(config.cwd, config.spreadsheet)
+    spreadsheet_path = os.path.join(config.cwd,'csv', config.spreadsheet)
 
     df = pd.read_csv(spreadsheet_path)
 
@@ -159,10 +159,15 @@ def loop_dataframe():
 
         # During each run through the loop, we grab the values from each column and
         # save them to variables.
-        lastName = row[0]
-        firstName = row[1]
-        county = row[5]
-        caseNo = row[6]
+
+        # lastName = row[0]
+        # firstName = row[1]
+        # county = row[5]
+        # caseNo = row[6]
+
+        caseName = row[0]
+        caseNo = row[1]
+        caseCourt = row[2]
         
 
         # Here we set up the logic to specify if we want to format the case numbers or not.
@@ -172,7 +177,7 @@ def loop_dataframe():
         if config.formatCaseNos == True:
             caseNo = format_case_number(caseNo)
         elif config.formatCaseNos == False:
-            caseNo = row[6]
+            caseNo = row[1]
         else:
             # If for some reason the 'formatCaseNos' variable is not set, we default on the
             # case numbers provided in the spreadsheet.
@@ -182,12 +187,12 @@ def loop_dataframe():
 
         #We run get_docket() on each docket number in the loop, which returns the dictionary
         # of that individual docket's json data. We save it to a variable.
-        docket = get_docket(caseNo)
+        docket = get_docket(caseNo, caseCourt)
 
         # We save the json files and set their individual filenames to be the last name of the
         # party followed by the docket number
 
-        write_to_json_file('json-output', f"{lastName} {caseNo}", docket)
+        write_to_json_file('json-output', f"{caseName} {caseNo}", docket)
 
         # With each loop, the progress bar moves forward.
         bar.next()

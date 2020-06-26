@@ -2,7 +2,7 @@ import os
 import json
 from progress.bar import IncrementalBar
 import requests
-import config
+from config import config
 
 
 def download_pdfs():
@@ -108,7 +108,29 @@ def download_pdfs():
                                 if 'link' in exhibit:
 
                                     # If a link to a PDF does exist, we store it in a variable.
-                                    link = exhibit['link']
+                                    exhibitLink = exhibit['link']
+                                    exhibitNumber = f"{exhibit['exhibit']}"
+                                    exhibitRequest = requests.get(exhibitLink, stream=True)
+
+                                    exhibitFileName = f"Exhibit {exhibitNumber}"
+                                    exhibitPathname = os.path.join(config.cwd,'pdf-output', base_filename, exhibitFileName)
+                                    dirpath = os.path.join(config.cwd,'pdf-output', base_filename)
+
+                                    # If the folder does not exist...
+                                    if not os.path.exists(dirpath):
+
+                                        # Then, create it!
+                                        os.makedirs(dirpath)
+                                    else:
+                                        pass
+
+                                    # Once the folder is created, we can create a file inside it, open it, and...
+                                    with open(pathname, "wb") as e:
+
+                                        # Write the contents of the PDF to the place we specify.
+                                        # ( Again, in this case, the 'result_filtered' folder)
+                                        e.write(exhibitRequest.content)
+                            
                                     # TODO: Specify a file name and save the exhibit links in their appropriate folder.
                                 else:
                                     pass
