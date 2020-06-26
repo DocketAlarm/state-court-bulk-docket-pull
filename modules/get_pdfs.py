@@ -2,7 +2,7 @@ import os
 import json
 from progress.bar import IncrementalBar
 import requests
-import config
+from config import config
 
 
 def download_pdfs():
