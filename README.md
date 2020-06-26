@@ -14,6 +14,8 @@ so they will be included exactly as they are written in courts.txt. Rename input
 
 Then, just run main.py and follow the instructions.
 
+There is plenty of inline documentation to help you out in case you want to modify the code.
+
 
 ## The Files:
 
