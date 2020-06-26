@@ -6,8 +6,7 @@ import os
 # to repurpose this code to make API calls based on a different spreadsheet,
 # or if you want to search within a different court.
 
-court = "Florida State, Duval County, Fourth Circuit Court"
-spreadsheet = "death-penalty-project.csv"
+spreadsheet = "input.csv"
 isCached = True
 
 

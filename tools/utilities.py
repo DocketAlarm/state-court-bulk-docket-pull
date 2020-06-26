@@ -1,3 +1,37 @@
+from config import auth
+from config import config
+import requests
+
+def authenticate():
+    """Returns the authentication token to make API calls.
+       Make sure that auth.py is filled out!
+    """
+
+    # This is the endpoint for logging in to Docket Alarm from the API.
+    login_url = "https://www.docketalarm.com/api/v1/login/"
+
+    # The data we will send to the endpoint with our post request will be
+    # our Docket Alarm username and password.
+    data = {
+        'username':auth.username,
+        'password':auth.password,
+        }
+
+    # We save the response to a variable. The response is a json object containing
+    # our authentication key iside the json key named 'login_token'
+    result = requests.post(login_url, data=data)
+
+    # Calling the .json() method on the result turns it into a python dictionary we
+    # can work with natively.
+    result_json = result.json()
+
+    # We go into the 'login_token' key in our dictionary. The value we save here to
+    # this variable is our authentication key.
+    login_token = result_json['login_token']
+
+    # We have the function return the key so this function can be called wherever we need
+    # the key.
+    return login_token
 
 def list_courts():
     """Prints all the courts to the console and returns a list of courts
@@ -27,8 +61,11 @@ def list_courts():
     # Uncomment out the 2 lines below to have the courts print to the console when calling
     # this function
 
-    # for court in courts:
-    #     print(court + "\n")
+    for court in courts:
+        print(court + "\n")
+        with open("courts.txt", "a") as txt:
+            txt.write(court + "\n")
+        
 
 
     # The function call returns a list object with all the courts we can search with Docket Alarm
@@ -87,3 +124,5 @@ def get_results(party_name, docketnum):
 
     # print(result_json)
     return search_results
+
+

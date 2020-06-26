@@ -1,5 +1,6 @@
 from modules import get_json
 from modules import get_pdfs
+from tools import utilities
 import os
 from colorama import init, Fore, Back, Style
 init()
@@ -87,11 +88,10 @@ Enter your response below.
 
     handle_input()
 
+    print("\nDone.")
+    input()
 
 
-    print(options)
-
-    get_json_and_pdfs()
 
 def get_json_and_pdfs():
 
@@ -103,5 +103,6 @@ def get_json_and_pdfs():
 
 if __name__ == '__main__':
     welcome()
+
 else:
     pass
