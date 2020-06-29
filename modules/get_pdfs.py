@@ -14,6 +14,10 @@ def download_pdfs():
     # The absolute path of the 'result' folder
     directory = os.path.join(config.cwd, 'json-output')
 
+    if os.path.isdir(directory) == False:
+        print("[ERROR] Could not write PDF files.\nMake sure 'json-output' folder exists in the root directroy of the program.\nCheck documentation for more information.\n")
+        input()
+
     # The amount of files in the 'result' folder. Used for the loading bar.
     max = len(os.listdir(directory))
 
@@ -113,7 +117,7 @@ def download_pdfs():
                                     exhibitRequest = requests.get(exhibitLink, stream=True)
 
                                     exhibitFileName = f"Exhibit {exhibitNumber}"
-                                    exhibitPathname = os.path.join(config.cwd,'pdf-output', base_filename, exhibitFileName)
+                                    exhibitPathName = os.path.join(config.cwd,'pdf-output', base_filename, exhibitFileName)
                                     dirpath = os.path.join(config.cwd,'pdf-output', base_filename)
 
                                     # If the folder does not exist...
@@ -123,15 +127,20 @@ def download_pdfs():
                                         os.makedirs(dirpath)
                                     else:
                                         pass
-
+                                    
+                                    try:
                                     # Once the folder is created, we can create a file inside it, open it, and...
-                                    with open(pathname, "wb") as e:
+                                        with open(exhibitPathName, "wb") as e:
 
-                                        # Write the contents of the PDF to the place we specify.
-                                        # ( Again, in this case, the 'result_filtered' folder)
-                                        e.write(exhibitRequest.content)
-                            
-                                    # TODO: Specify a file name and save the exhibit links in their appropriate folder.
+                                            # Write the contents of the PDF to the place we specify.
+                                            # ( Again, in this case, the 'result_filtered' folder)
+                                            e.write(exhibitRequest.content)
+                                
+                                        # TODO: Specify a file name and save the exhibit links in their appropriate folder.
+                                    except Exception as e:
+                                        print("[ERROR] Could not write PDF file.\nPlease ensure that 'pdf-output' folder is present at the root directory of the program.\nSee documentation for more details.\n")
+                                        input()
+                                        print(e)
                                 else:
                                     pass
                         else:
