@@ -12,3 +12,5 @@ modules/__pycache__/get_pdfs.cpython-38.pyc
 /config/auth.py
 modules/__pycache__/get_json.cpython-38.pyc
 modules/__pycache__/get_json.cpython-38.pyc
+/*/*.pyc
+modules/__pycache__/get_json.cpython-38.pyc
