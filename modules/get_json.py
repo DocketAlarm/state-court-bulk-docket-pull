@@ -52,7 +52,9 @@ def write_to_json_file(folder, fileName, data):
     """ 
     try:
         # Created the path where our .json file will be saved to
-        filePathNameWExt = os.path.join(config.cwd, folder, fileName + '.json')
+        # filePathNameWExt = os.path.join(config.cwd, folder, fileName + '.json')
+        filePathNameWExt = os.path.join(folder, fileName + '.json')
+
 
         # When 'opening' a file that doesn't yet exist, we create that file.
         # Here, we create the json file we'll be saving the data to.
@@ -155,7 +157,7 @@ def loop_dataframe():
     # an object representing tabular data that can comfortably be manipulated and
     # accessed in python.
 
-    spreadsheet_path = os.path.join(config.cwd,'csv', config.spreadsheet)
+    spreadsheet_path = os.path.join('csv', config.spreadsheet)
 
     try:
         df = pd.read_csv(spreadsheet_path)

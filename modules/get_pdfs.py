@@ -12,7 +12,8 @@ def download_pdfs():
     """
 
     # The absolute path of the 'result' folder
-    directory = os.path.join(config.cwd, 'json-output')
+    # directory = os.path.join(config.cwd, 'json-output')
+    directory = 'json-output'
 
     if os.path.isdir(directory) == False:
         print("[ERROR] Could not write PDF files.\nMake sure 'json-output' folder exists in the root directroy of the program.\nCheck documentation for more information.\n")
@@ -75,11 +76,11 @@ def download_pdfs():
                             # String variable that represents the absolute path complete with the filename we will be saving to.
                             # It saves in a folder named after the original JSON file and the PDF will be named after it's 
                             # corresponding document number.
-                            pathname = os.path.join(config.cwd,'pdf-output', base_filename, filename)
+                            pathname = os.path.join('pdf-output', base_filename, filename)
 
                             # The same as above, but this variable only lists the path to the directory we will be saving it.
                             # We create this variable to check for the existence of this directory and create it if it does not exist.
-                            dirpath = os.path.join(config.cwd,'pdf-output', base_filename)
+                            dirpath = os.path.join('pdf-output', base_filename)
 
                             # If the folder does not exist...
                             if not os.path.exists(dirpath):
@@ -117,8 +118,8 @@ def download_pdfs():
                                     exhibitRequest = requests.get(exhibitLink, stream=True)
 
                                     exhibitFileName = f"Exhibit {exhibitNumber}"
-                                    exhibitPathName = os.path.join(config.cwd,'pdf-output', base_filename, exhibitFileName)
-                                    dirpath = os.path.join(config.cwd,'pdf-output', base_filename)
+                                    exhibitPathName = os.path.join('pdf-output', base_filename, exhibitFileName)
+                                    dirpath = os.path.join('pdf-output', base_filename)
 
                                     # If the folder does not exist...
                                     if not os.path.exists(dirpath):

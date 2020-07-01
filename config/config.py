@@ -9,14 +9,6 @@ import os
 spreadsheet = "input.csv"
 isCached = True
 
-
-# This global variable should not be modified. This helps form abosulute paths
-# with os.path.join() within any subdirectories. We can always use 'cwd' to call
-# the root directory. 
-# If you're in doubt about whether or not if you understand what this does, it's
-# best not to change it.
-cwd = f"{os.getcwd()}"
-
 # This global variable also should not be changed unless you know for sure it suits
 # your use case. In some situations, the case numbers provided may not come in a
 # format that Docket Alarm recognizes. If this is set to True, then the program
