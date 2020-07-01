@@ -7,6 +7,12 @@ all of the files from the Docket Alarm API.
 ## Getting Started
 
 The first thing you need to do is enter your user authentication information.
+
+To begin, enter the docs folder and open requirements.txt. This file lists all the dependencies for this project.
+You will need to install all of these packages before the program can run.
+
+Now you need to do is enter your user authentication information.
+
 Go into auth.example.py inside the 'config' folder and enter the username and password for your Docket Alarm account.
 Change the name of the file to simply "auth.py"
 
@@ -15,6 +21,8 @@ want to pull. You will need to select courts from the courts.txt file to enter i
 so they will be included exactly as they are written in courts.txt. Rename input.example.csv to simply: input.csv.
 
 Then, just run main.py and follow the instructions.
+
+There is plenty of inline documentation to help you out in case you want to modify the code.
 
 ## The Files:
 
