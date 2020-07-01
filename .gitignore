@@ -3,10 +3,11 @@
 /log.txt
 /__pycache__
 /*.pyc
+/*/*.pyc
 *.pyc
-modules/__pycache__/get_json.cpython-38.pyc
-modules/__pycache__/get_pdfs.cpython-38.pyc
 /csv/input.csv
+/config/auth.py
+/*/*.pyc
 modules/__pycache__/get_json.cpython-38.pyc
 modules/__pycache__/get_pdfs.cpython-38.pyc
-/config/auth.py
+run.bat

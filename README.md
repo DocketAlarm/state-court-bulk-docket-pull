@@ -1,10 +1,18 @@
 # State Court Bulk Docket Pull
+
+This program allows you to download court case data and documents in bulk.
+A csv file full of case numbers will be taken as input, and the program will automatically download
+all of the files from the Docket Alarm API.
+
 ## Getting Started
+
+The first thing you need to do is enter your user authentication information.
 
 To begin, enter the docs folder and open requirements.txt. This file lists all the dependencies for this project.
 You will need to install all of these packages before the program can run.
 
 Now you need to do is enter your user authentication information.
+
 Go into auth.example.py inside the 'config' folder and enter the username and password for your Docket Alarm account.
 Change the name of the file to simply "auth.py"
 
@@ -16,7 +24,6 @@ Then, just run main.py and follow the instructions.
 
 There is plenty of inline documentation to help you out in case you want to modify the code.
 
-
 ## The Files:
 
 ### auth.example.py
@@ -25,8 +32,6 @@ The first place you'll need to go before experimenting with this script.
 You need to enter your Docket Alarm login information here.
 When you aredone, rename it to "auth.py" by removing the underscore,
 and you are ready to go!
-
-
 
 ### death-penalty-project.csv
 
@@ -41,7 +46,6 @@ This contains all the cases specified in the spreadsheet as JSON files.
 ### result folder
 
 Where your JSON files will appear when you run the main.py script.
-
 
 ### main.py
 

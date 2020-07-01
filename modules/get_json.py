@@ -50,15 +50,21 @@ def write_to_json_file(folder, fileName, data):
         the file you want to create, and the json object you want to write to
         the file.
     """ 
-    # Created the path where our .json file will be saved to
-    filePathNameWExt = os.path.join(config.cwd, folder, fileName + '.json')
+    try:
+        # Created the path where our .json file will be saved to
+        filePathNameWExt = os.path.join(config.cwd, folder, fileName + '.json')
 
-    # When 'opening' a file that doesn't yet exist, we create that file.
-    # Here, we create the json file we'll be saving the data to.
-    with open(filePathNameWExt, 'w') as fp:
+        # When 'opening' a file that doesn't yet exist, we create that file.
+        # Here, we create the json file we'll be saving the data to.
+        with open(filePathNameWExt, 'w') as fp:
 
-        # Then we write the data to the newly created .json file.
-        json.dump(data,fp)
+            # Then we write the data to the newly created .json file.
+            json.dump(data,fp)
+    
+    except Exception as e:
+        print("\nError writing json file. Make sure 'json-output' folder is present in the root directory of the program.\nReference the documentation for more information\n")
+        input()
+        print(e)
 
 def authenticate():
     """Returns the authentication token to make API calls.
@@ -82,6 +88,11 @@ def authenticate():
     # Calling the .json() method on the result turns it into a python dictionary we
     # can work with natively.
     result_json = result.json()
+
+    if result_json['success'] != True:
+        print("\n\nThere was an error authenticating your account.\nPlease check config/auth.py and make sure your Docket Alarm account info is there.\nReference the documentation for more information.\n")
+        input()
+        print(result_json['error'])
 
     # We go into the 'login_token' key in our dictionary. The value we save here to
     # this variable is our authentication key.
@@ -110,6 +121,8 @@ def get_docket(docket, caseCourt):
     }
 
     result = requests.get(getdocket_url, data, timeout=30)
+    
+
     result_json = result.json()
     try:
         result_json = result.json()
@@ -144,12 +157,17 @@ def loop_dataframe():
 
     spreadsheet_path = os.path.join(config.cwd,'csv', config.spreadsheet)
 
-    df = pd.read_csv(spreadsheet_path)
+    try:
+        df = pd.read_csv(spreadsheet_path)
+        len_df = len(df)
+        # We declare a new variable that represents the amount of rows in the DataFrame.
+        # We use this when we add our loading bar, to tell it what the max number of
+        # loops is.
+    except Exception:
+        print("[ERROR] Input CSV file not found. Check to make sure the file is present and the filename matches the name specified in config/config.py\nThe default filename is 'input.csv' and it should be placed in the 'csv' folder.\nAlso, ensure all dependencies are installed.\nDependencies are listed in docs/requirements.txt\nReference documentation for more information.")
+        input()
 
-    # We declare a new variable that represents the amount of rows in the DataFrame.
-    # We use this when we add our loading bar, to tell it what the max number of
-    # loops is.
-    len_df = len(df)
+
 
     # Here we display the loading bar on the console.
     bar = IncrementalBar('Downloading JSON Data', max=len_df)
