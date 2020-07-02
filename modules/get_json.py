@@ -218,5 +218,9 @@ def loop_dataframe():
         bar.next()
 
     # Forces the progress bar to 100%
-    bar.finish()    
+    bar.finish()
+    try:
+        os.startfile('json-output')
+    except Exception:
+        pass  
 

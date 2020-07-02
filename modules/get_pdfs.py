@@ -136,6 +136,10 @@ def download_pdfs():
 
             # We close the file when we are done. This also ensures that the file is saved.    
             jsonFile.close()
-    bar.finish()    
+    bar.finish()
+    try:
+        os.startfile("pdf-output")
+    except Exception:
+        pass  
         
 
