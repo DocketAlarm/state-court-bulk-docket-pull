@@ -103,6 +103,3 @@ def get_json_and_pdfs():
 
 if __name__ == '__main__':
     welcome()
-
-else:
-    pass
