@@ -8,8 +8,8 @@ class TestGetJson(unittest.TestCase):
 
     def test_write_to_json_file(self):
         get_json.write_to_json_file(os.getcwd(),"test", {'test':'yes'})
-        bool = os.path.isfile(os.path.join(os.getcwd(),'test.json'))
-        self.assertTrue(bool)
+        bool_ = os.path.isfile(os.path.join(os.getcwd(),'test.json'))
+        self.assertTrue(bool_)
         os.remove(os.path.join(os.getcwd(), 'test.json'))
 
     def test_authenticate(self):

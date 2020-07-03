@@ -3,12 +3,48 @@ import json
 from progress.bar import IncrementalBar
 import requests
 from config import config
+import re
 
+# This file contains 2 functions.
+# cleanhtml() will be used inside of download_pdfs().
+# download_pdfs() is used for downloading pdf files from Docket Alarm,
+# while cleanhtml() is used for creating valid filenames that download_pdf() can use.
+# The name of the document comes between HTML tags, so cleanhtml() removes those tags
+# and returns a string that can be used as a filename.
+
+
+def cleanhtml(raw_html):
+    """
+    This function is for creating filenames from the HTML returned from the API call.
+    It takes in a string containing HTML tags as an argument, and returns a string without HTML tags or any
+    characters that can't be used in a filename.
+    """
+
+    # Created a regular expression pattern object for detecting HTML tags
+    cleanr = re.compile('<.*?>')
+
+    # Removes HTML tags from the string argument
+    cleantext = re.sub(cleanr, '', raw_html)
+
+    # Replaces spaces with underscores
+    cleantext = str(cleantext).strip().replace(' ', '_')
+
+    # Removes characters that can't be used in filenames
+    cleantext = re.sub(r'(?u)[^-\w.]', '', cleantext)
+
+    # Removes periods
+    cleantext = cleantext.replace(".", "")
+
+    # Cuts the name short so it doesn't go over the maximum amount of characters for a NTFS filename
+    cleantext = cleantext[0:240]
+
+    return cleantext
 
 def download_pdfs():
-    """ Scans through JSON files in results folder,
-        downloads any PDF links listed in the JSON data,
-        and outputs the PDF's to the result_filtered folder
+    """ 
+    Scans through JSON files in results folder,
+    downloads any PDF links listed in the JSON data,
+    and outputs the PDF's to the result_filtered folder
     """
 
     # The absolute path of the 'result' folder
@@ -59,18 +95,29 @@ def download_pdfs():
                 # docket_report will be a list of dictionaries. This loops through each dictionary in the list.
                 for item in docket_report:
 
+                    # The name of the document. We will use this later for the filenames.
+                    docName = item['contents']
+
+                    # We run the cleanhtml() function on the document name to remove the HTML tags and acharcters that can't be used in filenames
+                    docName = cleanhtml(docName)
+
+                    # The ID number of the document. We use this later for the file names
+                    docNum = item['number']
+
                     # Checks to see if any of the dictionaries inside the list contain a 'link' key
                     if 'link' in item:
 
                         # The 'link' key contains a link to a PDF file associated with that item in the docket report.
                         link = item['link']
                         
+
+
                         # Makes a request to access the PDF file stored at the link.
                         r = requests.get(link, stream=True)
 
                         # Creates a string that will be used as a uniques name for the PDF file we'll be saving.
                         # Here we use the document number.
-                        filename = f"{item['number']}.pdf"
+                        filename = f"{docNum} - {docName}.pdf"
 
                         # String variable that represents the absolute path complete with the filename we will be saving to.
                         # It saves in a folder named after the original JSON file and the PDF will be named after it's 
@@ -111,7 +158,7 @@ def download_pdfs():
                                 exhibitNumber = f"{exhibit['exhibit']}"
                                 exhibitRequest = requests.get(exhibitLink, stream=True)
 
-                                exhibitFileName = f"Exhibit {exhibitNumber}"
+                                exhibitFileName = f"Exhibit {exhibitNumber} - {docNum} - {docName}"
                                 exhibitPathName = os.path.join('pdf-output', base_filename, exhibitFileName)
                                 dirpath = os.path.join('pdf-output', base_filename)
 

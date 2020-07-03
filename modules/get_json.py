@@ -1,5 +1,6 @@
 from config import config
 from config import auth
+from modules import login
 
 
 # Module for working with tabular data like csv and excel files.
@@ -72,6 +73,7 @@ def authenticate():
     """Returns the authentication token to make API calls.
        Make sure that auth.py is filled out!
     """
+    user = login.Credentials()
 
     # This is the endpoint for logging in to Docket Alarm from the API.
     login_url = "https://www.docketalarm.com/api/v1/login/"
@@ -79,8 +81,9 @@ def authenticate():
     # The data we will send to the endpoint with our post request will be
     # our Docket Alarm username and password.
     data = {
-        'username':auth.username,
-        'password':auth.password,
+        'username':user.username,
+        'password':user.password,
+        'client_matter': user.client_matter,
         }
 
     # We save the response to a variable. The response is a json object containing
@@ -111,11 +114,13 @@ def authenticate():
 def get_docket(docket, caseCourt):
     """ Takes in a docket number as an argument and returns all the JSON data available from Docket Alarm.
     """
+    user = login.Credentials()
+
     getdocket_url = "https://www.docketalarm.com/api/v1/getdocket/"
 
     data = {
         'login_token':authenticate(),
-        'client_matter': auth.client_matter,
+        'client_matter': user.client_matter,
         'court': caseCourt,
         'docket':docket,
         'cached': config.isCached,
