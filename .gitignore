@@ -1,13 +1,26 @@
+# text editor cache files
 /.vscode
+
+# authentication information
 /auth.py
-/log.txt
-/__pycache__
+/sav/*.pickle
+
+# compiled python files
+/__pycache__/*
+/*/__pycache__/*
 /*.pyc
 /*/*.pyc
 *.pyc
+
+# Filled out templates
 /csv/input.csv
 /config/auth.py
-/*/*.pyc
-modules/__pycache__/get_json.cpython-38.pyc
-modules/__pycache__/get_pdfs.cpython-38.pyc
+
+# Launcher script with absolute paths
 run.bat
+
+# Output files
+/pdf-output/*
+!pdf-output/.gitkeep
+json-output/*.json
+

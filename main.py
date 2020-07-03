@@ -1,5 +1,6 @@
 from modules import get_json
 from modules import get_pdfs
+from modules import login
 from tools import utilities
 import os
 from colorama import init, Fore, Back, Style
@@ -36,6 +37,18 @@ def welcome():
     print("Welcome!")
     input("Press ENTER key to begin!")
     clear()
+
+    # Checks to see if the account information was stored on the local machine previously
+    if not os.path.isfile(os.path.join("sav", "credentials.pickle")):
+
+        # If the user hasn't successfullly logged in before, it takes them to a menu sequence to log in, and saves the info locally
+        # for the next time the script is run.
+        login.login_interface()
+
+    
+    user = login.Credentials()
+
+    print(f"You are logged in as: {user.username}")
     instructions = """
 Instructions:
 
