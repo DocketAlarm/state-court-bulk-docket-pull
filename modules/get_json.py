@@ -1,6 +1,8 @@
 from config import config
 from config import auth
 from modules import login
+from modules import file_browser
+import main
 
 
 # Module for working with tabular data like csv and excel files.
@@ -162,7 +164,23 @@ def loop_dataframe():
     # an object representing tabular data that can comfortably be manipulated and
     # accessed in python.
 
-    spreadsheet_path = os.path.join('csv', config.spreadsheet)
+    print("Select the file path of your input CSV file.\nUpon pressing ENTER, a file browser window will apear.")
+    input()
+    
+    # Opens a file browser where the user can use a friendly GUI to find their CSV input file.
+    spreadsheet_path = file_browser.browseCSVFiles()
+
+    # Displays the choice to the user and prompts them to confirm if their selected file is correct.
+    # If it is not, it will bring them back to the file browser to browse for another file.
+    main.clear()
+    print(f"We will load the input csv from: {spreadsheet_path}\nIs this okay? (Y/n)")
+    csvInputAnswer = input()
+    if csvInputAnswer.upper().strip() != "Y":
+        loop_dataframe()
+    main.clear()
+    print(main.msg)
+ 
+    # spreadsheet_path = os.path.join('csv', config.spreadsheet)
 
     try:
         df = pd.read_csv(spreadsheet_path)
@@ -184,11 +202,6 @@ def loop_dataframe():
 
         # During each run through the loop, we grab the values from each column and
         # save them to variables.
-
-        # lastName = row[0]
-        # firstName = row[1]
-        # county = row[5]
-        # caseNo = row[6]
 
         caseName = row[0]
         caseNo = row[1]
