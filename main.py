@@ -94,7 +94,8 @@ Enter your response below.
         elif userChoice == "3":
             clear()
             print(msg)
-            get_pdfs.download_pdfs()
+            link_list = get_pdfs.get_urls("json-output")
+            get_pdfs.multiprocess_download_pdfs(link_list)
         else:
             print("Please Enter Valid input (1, 2 or 3)")
             return handle_input()
@@ -110,7 +111,8 @@ def get_json_and_pdfs():
 
     get_json.loop_dataframe()
 
-    get_pdfs.download_pdfs()
+    link_list = get_pdfs.get_urls("json-output")
+    get_pdfs.multiprocess_download_pdfs(link_list)
 
     print("done")
 
