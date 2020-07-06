@@ -4,14 +4,8 @@ from progress.bar import IncrementalBar
 import requests
 from config import config
 import re
-
-# This file contains 2 functions.
-# cleanhtml() will be used inside of download_pdfs().
-# download_pdfs() is used for downloading pdf files from Docket Alarm,
-# while cleanhtml() is used for creating valid filenames that download_pdf() can use.
-# The name of the document comes between HTML tags, so cleanhtml() removes those tags
-# and returns a string that can be used as a filename.
-
+from multiprocessing import Pool, cpu_count
+import datetime
 
 def cleanhtml(raw_html):
     """
@@ -40,31 +34,37 @@ def cleanhtml(raw_html):
 
     return cleantext
 
-def download_pdfs():
-    """ 
-    Scans through JSON files in results folder,
-    downloads any PDF links listed in the JSON data,
-    and outputs the PDF's to the result_filtered folder
+def get_urls(input_directory):
+    """
+    Takes in a directory full of JSON files as input, and returns the values for keys labeled 'link' for all of the files.
+    The output is a list of tuples.
+    The first item in each tuple is a string containing the link.
+    The second item in each tuple is a string containing the name of the document the link is connected to.
+    The third item in each tuple is a string containing the original file name of the json file that the link was retrieved from.
     """
 
-    # The absolute path of the 'result' folder
-    directory = 'json-output'
+    # This list will be appended throughout the function with every pdf link found within the json files.
+    # It will ultimately be returned at the end of the function.
+    pdf_list = []
 
-    if os.path.isdir(directory) == False:
+    # The absolute path of the 'result' folder
+    input_directory = 'json-output'
+
+    if os.path.isdir(input_directory) == False:
         print("[ERROR] Could not write PDF files.\nMake sure 'json-output' folder exists in the root directroy of the program.\nCheck documentation for more information.\n")
         input()
 
     # The amount of files in the 'result' folder. Used for the loading bar.
-    max = len(os.listdir(directory))
+    # max = len(os.listdir(input_directory))
 
     # Creates a loading bar
-    bar = IncrementalBar("Downloading PDFs", max=max)
+    # bar = IncrementalBar("Downloading PDFs", max=max)
 
     # Loops through every file in the 'result' directory.
-    for file in os.listdir(directory):
+    for file in os.listdir(input_directory):
 
         # Tells the progress bar to move forward on each iteration of the loop/
-        bar.next()
+        # bar.next()
 
         # Saves the name of each file in the folder to a variable
         filename = os.fsdecode(file)
@@ -73,11 +73,8 @@ def download_pdfs():
         if not filename.lower().endswith(".json"):
             continue
         # Stores the absolute path of the current JSON file in the loop as a variable. 
-        path = os.path.join(directory, filename)
-        
-        # The filename of the current JSON file in the loop without '.JSON' included.
-        # Used for creating folder names correstponding to the JSON file the PDF's 
-        # within the folder were created from.
+        path = os.path.join(input_directory, filename)
+
         base_filename = filename.split(".")[0]
         
         # Opens each individual JSON file
@@ -94,8 +91,7 @@ def download_pdfs():
 
                 # docket_report will be a list of dictionaries. This loops through each dictionary in the list.
                 for item in docket_report:
-
-                    # The name of the document. We will use this later for the filenames.
+                    
                     docName = item['contents']
 
                     # We run the cleanhtml() function on the document name to remove the HTML tags and acharcters that can't be used in filenames
@@ -109,84 +105,111 @@ def download_pdfs():
 
                         # The 'link' key contains a link to a PDF file associated with that item in the docket report.
                         link = item['link']
-                        
 
+                        link_filename = f"{docNum} - {docName}"
 
-                        # Makes a request to access the PDF file stored at the link.
-                        r = requests.get(link, stream=True)
-
-                        # Creates a string that will be used as a uniques name for the PDF file we'll be saving.
-                        # Here we use the document number.
-                        filename = f"{docNum} - {docName}.pdf"
-
-                        # String variable that represents the absolute path complete with the filename we will be saving to.
-                        # It saves in a folder named after the original JSON file and the PDF will be named after it's 
-                        # corresponding document number.
-                        pathname = os.path.join('pdf-output', base_filename, filename)
-
-                        # The same as above, but this variable only lists the path to the directory we will be saving it.
-                        # We create this variable to check for the existence of this directory and create it if it does not exist.
-                        dirpath = os.path.join('pdf-output', base_filename)
-
-                        # If the folder does not exist...
-                        if not os.path.exists(dirpath):
-
-                            # Then, create it!
-                            os.makedirs(dirpath)
-
-                        # Once the folder is created, we can create a file inside it, open it, and...
-                        with open(pathname, "wb") as f:
-
-                            # Write the contents of the PDF to the place we specify.
-                            # ( Again, in this case, the 'result_filtered' folder)
-                            f.write(r.content)
+                        link_tuple = (link, link_filename, base_filename)
+                        # Add the found link to the list, which will ultimately be returned at the end of the function.
+                        pdf_list.append(link_tuple)
 
                     # Some PDF's are inside the exhibits key, which doesnt always exist. Here, we check to see if the exhibits key exists.
                     if 'exhibits' in item:
 
                         # if it does exist, we save its contents in an exhibits variable.
                         exhibits = item['exhibits']
-
+                        
                         # The data contained inside 'exhibits' will be a list of dictionaries. So we loop through the list to access the data.
                         for exhibit in exhibits:
 
                             # We chck to see if any links exist inside exhibits
                             if 'link' in exhibit:
 
+                                exhibitNumber = f"{exhibit['exhibit']}"
+
                                 # If a link to a PDF does exist, we store it in a variable.
                                 exhibitLink = exhibit['link']
-                                exhibitNumber = f"{exhibit['exhibit']}"
-                                exhibitRequest = requests.get(exhibitLink, stream=True)
-
-                                exhibitFileName = f"Exhibit {exhibitNumber} - {docNum} - {docName}"
-                                exhibitPathName = os.path.join('pdf-output', base_filename, exhibitFileName)
-                                dirpath = os.path.join('pdf-output', base_filename)
-
-                                # If the folder does not exist...
-                                if not os.path.exists(dirpath):
-
-                                    # Then, create it!
-                                    os.makedirs(dirpath)
                                 
-                                try:
-                                # Once the folder is created, we can create a file inside it, open it, and...
-                                    with open(exhibitPathName, "wb") as e:
+                                exhibitName = f"Exhibit {exhibitNumber} - {docNum} - {docName}"
 
-                                        # Write the contents of the PDF to the place we specify.
-                                        # ( Again, in this case, the 'result_filtered' folder)
-                                        e.write(exhibitRequest.content)
-                            
-                                except Exception as e:
-                                    print("[ERROR] Could not write PDF file.\nPlease ensure that 'pdf-output' folder is present at the root directory of the program.\nSee documentation for more details.\n")
-                                    input()
-                                    print(e)
+                                exhibitLink_tuple = (exhibitLink, exhibitName, base_filename)
+                                pdf_list.append(exhibitLink_tuple)
 
             # We close the file when we are done. This also ensures that the file is saved.    
             jsonFile.close()
-    bar.finish()
-    try:
-        os.startfile("pdf-output")
-    except Exception:
-        pass  
-        
+    # bar.finish()
+    return pdf_list
 
+def download_from_link_list(link, fileName, folderName):
+    """
+    Downloads PDF documents from the web and saves them in a specified folder.
+    Takes in 3 string arguments:
+    1. Link to a pdf file
+    2. File name we will save as
+    3. Name of the folder we will create to store our PDFs.
+    Notice how the arguments are the same as what the get_urls() function returns.
+    This function Isn't made to be used on its own, but can be.
+    """
+    output_directory = 'pdf-output'
+    outputDirectoryPath = os.path.join(output_directory, folderName)
+    outputFilePath = os.path.join(outputDirectoryPath, f"{fileName}.pdf")
+
+    if not os.path.exists(outputDirectoryPath):
+
+        # Then, create it!
+        os.makedirs(outputDirectoryPath)
+    
+    apiRequest = requests.get(link, stream=True)
+
+    try:
+    # Once the folder is created, we can create a file inside it, open it, and...
+        with open(outputFilePath, "wb") as e:
+
+            # Write the contents of the PDF to the place we specify.
+            # ( Again, in this case, the 'result_filtered' folder)
+            e.write(apiRequest.content)
+    
+    except Exception as a:
+        print(a)
+
+
+def multiprocess_download_pdfs(link_list):
+    """
+    Gets a list of PDF documents with appropriate output filenames and foldernames from the get_urls() function.
+    We use multiprocessing to dedicate all of our cpu cores to running the download_from_link_list() function with the
+    result of get_urls as the arguments for each pass through the function.
+    """
+
+    print("Downloading PDFs...")
+
+    # Initiates the pool, assigns different calls to a function to a specified amount of CPU cores.
+    # In this case, we pass the cpu_count() which represents the amount of CPU cores in the current system.
+    # This will ensure that all the systems cores get utilized, and the more cores the system has, the faster the files will download.
+    with Pool(cpu_count()) as pool:
+        # Starmap allows us to pass multiple arguments to the function of our choice. The arguments are fed in as a list of tuples.
+        # download_from_link_list is the function we are passing the tuples to.
+        # Files will not be downloaded in order, they are simply downloaded. When a process finishes on one core, it simply picks up
+        # another call to the function with the tuple arguments that haven't been passed through yet.
+        try:
+            pool.starmap(download_from_link_list, link_list)
+        except Exception as a:
+
+            # If there is an error, the log file located at log\log.txt will be appended with the date and time, followed by the error that occured.
+            # The program will not stop if an error is thrown.
+            timeNow = datetime.datetime.now().strftime("%I:%M%p %B %d, %Y")
+            with open(os.path.join('log', 'log.txt'), 'a') as errorlog:
+                errorlog.write(f"\n{timeNow}\n")
+                errorlog.write(a)
+                
+    # When the job is finished. We terminate the pool and free-up our cpu cores.
+    pool.terminate()
+
+
+
+
+
+
+
+
+
+        
+        
