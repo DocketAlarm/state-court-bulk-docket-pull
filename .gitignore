@@ -24,3 +24,6 @@ run.bat
 !pdf-output/.gitkeep
 json-output/*.json
 
+# Error logs
+/logs/*.txt
+log/log.txt
