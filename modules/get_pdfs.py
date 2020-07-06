@@ -5,14 +5,7 @@ import requests
 from config import config
 import re
 from multiprocessing import Pool, cpu_count
-
-# This file contains 2 functions.
-# cleanhtml() will be used inside of download_pdfs().
-# download_pdfs() is used for downloading pdf files from Docket Alarm,
-# while cleanhtml() is used for creating valid filenames that download_pdf() can use.
-# The name of the document comes between HTML tags, so cleanhtml() removes those tags
-# and returns a string that can be used as a filename.
-
+import datetime
 
 def cleanhtml(raw_html):
     """
@@ -43,7 +36,11 @@ def cleanhtml(raw_html):
 
 def get_urls(input_directory):
     """
-    Experimental!
+    Takes in a directory full of JSON files as input, and returns the values for keys labeled 'link' for all of the files.
+    The output is a list of tuples.
+    The first item in each tuple is a string containing the link.
+    The second item in each tuple is a string containing the name of the document the link is connected to.
+    The third item in each tuple is a string containing the original file name of the json file that the link was retrieved from.
     """
 
     # This list will be appended throughout the function with every pdf link found within the json files.
@@ -144,7 +141,13 @@ def get_urls(input_directory):
 
 def download_from_link_list(link, fileName, folderName):
     """
-    Experimental
+    Downloads PDF documents from the web and saves them in a specified folder.
+    Takes in 3 string arguments:
+    1. Link to a pdf file
+    2. File name we will save as
+    3. Name of the folder we will create to store our PDFs.
+    Notice how the arguments are the same as what the get_urls() function returns.
+    This function Isn't made to be used on its own, but can be.
     """
     output_directory = 'pdf-output'
     outputDirectoryPath = os.path.join(output_directory, folderName)
@@ -170,9 +173,34 @@ def download_from_link_list(link, fileName, folderName):
 
 
 def multiprocess_download_pdfs(link_list):
+    """
+    Gets a list of PDF documents with appropriate output filenames and foldernames from the get_urls() function.
+    We use multiprocessing to dedicate all of our cpu cores to running the download_from_link_list() function with the
+    result of get_urls as the arguments for each pass through the function.
+    """
+
     print("Downloading PDFs...")
+
+    # Initiates the pool, assigns different calls to a function to a specified amount of CPU cores.
+    # In this case, we pass the cpu_count() which represents the amount of CPU cores in the current system.
+    # This will ensure that all the systems cores get utilized, and the more cores the system has, the faster the files will download.
     with Pool(cpu_count()) as pool:
-        pool.starmap(download_from_link_list, link_list)
+        # Starmap allows us to pass multiple arguments to the function of our choice. The arguments are fed in as a list of tuples.
+        # download_from_link_list is the function we are passing the tuples to.
+        # Files will not be downloaded in order, they are simply downloaded. When a process finishes on one core, it simply picks up
+        # another call to the function with the tuple arguments that haven't been passed through yet.
+        try:
+            pool.starmap(download_from_link_list, link_list)
+        except Exception as a:
+
+            # If there is an error, the log file located at log\log.txt will be appended with the date and time, followed by the error that occured.
+            # The program will not stop if an error is thrown.
+            timeNow = datetime.datetime.now().strftime("%I:%M%p %B %d, %Y")
+            with open(os.path.join('log', 'log.txt'), 'a') as errorlog:
+                errorlog.write(f"\n{timeNow}\n")
+                errorlog.write(a)
+                
+    # When the job is finished. We terminate the pool and free-up our cpu cores.
     pool.terminate()
 
 
