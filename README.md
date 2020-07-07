@@ -4,132 +4,1237 @@ This program allows you to download court case data and documents in bulk.
 A csv file full of case numbers will be taken as input, and the program will automatically download
 all of the files from the Docket Alarm API.
 
-## Getting Started
+## Quick Start Guide
+1. Populate a CSV file with all of the dockets you would like to download.
+    1. Download the CSV template here: ```https://drive.google.com/file/d/1_8i8GEO6GlW1cjtH2afluJXCWyCRP5DG/view?usp=sharing```
+    1. The ```Name``` column can contain whatever text you would like to identify the docket. This will be used for storing filenames.
+    1. The ```DocketNumber``` column must contain docket numbers in the same format they appear in on ```DocketAlarm.com```.
+    1. The ```Court``` field must contain the court the docket is filed in. The name of the court must be spelled exactly the same as it appears in our supported court list.
+1. Clone the repository to your machine: ```git clone "https://github.com/ryanfitz514/state-court-bulk-docket-pull"```
+1. Enter the root: ```cd state-court-bulk-docket-pull```
+1. Download the dependencies: ```pip install -r docs/requirements.txt```
+1. Run the main.py file: ```python main.py``` (Windows) or ```python3 main.py``` (Unix)
+1. Log in with your Docket Alarm username and password
+1. Follow the directions on screen. You will be prompted to choose between downloading JSON files, PDF files, or both.
+1. A file browser will prompt you to select the location of your input csv file.
+1. When your download is complete, a folder will open containing all of your downloaded files.
 
-The first thing you need to do is enter your user authentication information.
-
-To begin, enter the docs folder and open requirements.txt. This file lists all the dependencies for this project.
-You will need to install all of these packages before the program can run.
-
-Now you need to do is enter your user authentication information.
-
-Go into auth.example.py inside the 'config' folder and enter the username and password for your Docket Alarm account.
-Change the name of the file to simply "auth.py"
-
-Next, go to the input.example.csv file in the 'csv' folder. Fill this out with the information for any dockets you
-want to pull. You will need to select courts from the courts.txt file to enter into the csv. Copy and paste them
-so they will be included exactly as they are written in courts.txt. Rename input.example.csv to simply: input.csv.
-
-Then, just run main.py and follow the instructions.
-
-There is plenty of inline documentation to help you out in case you want to modify the code.
-
-For a more detailed step-by-step guide to getting things up by running. See the Walkthrough section below.
-
-## Walkthrough
-
-1. Getting to the root 
-    1. Download the project files as a .zip and extract them to a directory of your choosing.
-    1. Enter the root of the project, the ```state-court-bulk-docket-pull``` folder.
-1. Logging in to Docket Alarm
-    1. Go into the ```config``` folder and copy the ```auth.example.py``` file inside the same directory.
-    1. Rename the copy of ```auth.example.py``` to ```auth.py```.
-    1. Open ```auth.py``` and set ```username = '[Your Docket Alarm Username]'``` (Keep the quotes)
-    1. Continue to set ```password = '[Your Docket Alarm Password]'``` (Keep the quotes)
-    1. Inside of the quotes on the right side of the equal sign next to ```client_matter```, enter a short description of what you are using the program for.
-    1. Save and close ```auth.py```
-1. Filling out the csv with the cases you want to download data for
-    1. From the root directory of the project, ```state-court-bulk-docket-pull``` open the ```csv``` folder.
-    1. Inside the ```csv``` folder, make a copy of ```input.example.csv```.
-    1. Rename ```input.example.csv``` to ```input.csv```
-    1. ```input.csv``` is a blank template you will edit to specify the API calls you want to make. The program will download any cases listed here.
-    1. ```input.csv``` has 3 columns: Name, Docket Number, and Court.
-      1. The Name column can be set to whatever you want. Name it something that will help you identify that individual case. It is used for the output filenames.
-      1. The Docket Number column is where you will enter the docket numbers to be searched.
-        1. It's a good idea to look for some of your cases on the Docket Alarm website to see what format the Docket Numbers should be in.
-      1. The Court column is the court you are searching for that particular docket number. The spelling of the court name is very important.
-        1. To find a court go to ```state-court-bulk-docket-pull\docs\courts.txt```. This file contains all the courts Docket Alarm can search.
-          1. Copy and paste from here into your csv to ensure you have the proper spelling.
-      1. You can save and close ```input.csv``` when you are done and leave it in the ```csv``` directory.
-1. Installing Dependencies
-    1. Before you can run the program, you need to ensure you have all of the dependencies installed.
-    1. To install all the dependencies at once, open your command prompt and cd to the root directory.
-      1. ```cd "C:\Users\Ryan\Documents\Programming\Python\state-court-bulk-docket-pull"```
-        1. (This will be different for you, depending on where you saved your ```state-court-bulk-docket-pull``` folder)
-      1. When the root of the project is your working directory, type: ```pip install -r docs/requirements.txt```
-      1. When the install completes, stay in the current directory to launch the program.
-1. Launching the Program
-    1. If you haven't already, open your command prompt and choose the root of the project as your current working directory.
-      1. The command will be something similar to ```cd "C:\Users\Ryan\Documents\Programming\Python\state-court-bulk-docket-pull"```
-      1. Now that your current working directory is set to the root, simply enter ```python main.py``` to launch the program.
-      1. From here, the instructions inside the program will guide you.
-      1. When the program finishes running. Your results can be found in the directories: ```state-court-bulk-docket-pull\json-output``` and ```\pdf-output```.
-
-## The Files:
-
-### auth.example.py
-
-The first place you'll need to go before experimenting with this script.
-You need to enter your Docket Alarm login information here.
-When you aredone, rename it to "auth.py" by removing the underscore,
-and you are ready to go!
-
-### death-penalty-project.csv
-
-The example csv file used. Feel free to change the file and tweak the script to 
-suit your own use case!
-
-### JSON files.zip
-
-A backup of the 'result' folder from when I ran this script with isCached=True on 6/22/20.
-This contains all the cases specified in the spreadsheet as JSON files.
-
-### result folder
-
-Where your JSON files will appear when you run the main.py script.
-
-### main.py
-
-This is the file used to launch the program. It contains a variety of functions:
-
-#### write_to_json_file(folder, fileName, data)
-
-takes in the name of a folder in the current directory, the name of
-the file you want to create, and the json object you want to write to
-the file.
-
-#### authenticate()
-
-Returns the authentication token to make API calls.
-Make sure that auth.py is filled out!
-
-#### list_courts()
-
-Prints all the courts to the console and returns a list of courts.
-
-#### get_parameters()
-
-Returns all of the parameters you can use when making a post request to the /searchdirect endpoint.
-
-#### get_results(party_name, docketnum)
-
-Takes in the name of a party and the docket number as a parameter,
-returns the Docket Alarm search results. You can make calls to the
-/getdocket endpoint with these results to get more detailed information
-on the docket you are looking for.
-
-#### get_docket(docket)
-
-Takes in a docket number as an argument and returns all the JSON data
-available from Docket Alarm.
-
-#### format_case_number(unformatted_case_number)
-
-Trims off excess data from the case numbers
-provided, and returns the same number in a
-form that Docket Alarm can search for.
-
-#### loop_dataframe()
-
-loops through the spreadsheet listed in the global variable toward the top of
-this script. Returns docket info from each.
+## Supported Court List
+- Supreme Court of the United States
+- Arkansas State, Supreme Court
+- California State Supreme Court
+- Connecticut State, Supreme Court
+- Florida State, Supreme Court
+- Minnesota State, Supreme Court
+- Missouri State, Supreme Court
+- Nevada State, Supreme Court
+- Oregon State, Supreme Court
+- Pennsylvania State, Supreme Court
+- South Carolina State, Supreme Court
+- Texas State, Supreme Court
+- Virgin Islands, Supreme Court
+- Virginia State, Supreme Court
+- Wyoming State, Supreme Court
+- New York State, Albany County, Supreme Court
+- New York State, Bronx County, Supreme Court
+- New York State, Broome County, Supreme Court
+- New York State, Cattaraugus County, Supreme Court
+- New York State, Cayuga County, Supreme Court
+- New York State, Chautauqua County, Supreme Court
+- New York State, Chenango County, Supreme Court
+- New York State, Cortland County, Supreme Court
+- New York State, Delaware County, Supreme Court
+- New York State, Dutchess County, Supreme Court
+- New York State, Erie County, Supreme Court
+- New York State, Essex County, Supreme Court
+- New York State, Franklin County, Supreme Court
+- New York State, Jefferson County, Supreme Court
+- New York State, Kings County, Supreme Court
+- New York State, Lewis County, Supreme Court
+- New York State, Livingston County, Supreme Court
+- New York State, Madison County, Supreme Court
+- New York State, Monroe County, Supreme Court
+- New York State, Nassau County, Supreme Court
+- New York State, New York County, Supreme Court
+- New York State, Oneida County, Supreme Court
+- New York State, Onondaga County, Supreme Court
+- New York State, Ontario County, Supreme Court
+- New York State, Orange County, Supreme Court
+- New York State, Oswego County, Supreme Court
+- New York State, Otsego County, Supreme Court
+- New York State, Putnam County, Supreme Court
+- New York State, Queens County, Supreme Court
+- New York State, Richmond County, Supreme Court
+- New York State, Rockland County, Supreme Court
+- New York State, Seneca County, Supreme Court
+- New York State, St. Lawrence County, Supreme Court
+- New York State, Steuben County, Supreme Court
+- New York State, Suffolk County, Supreme Court
+- New York State, Tioga County, Supreme Court
+- New York State, Tompkins County, Supreme Court
+- New York State, Warren County, Supreme Court
+- New York State, Washington County, Supreme Court
+- New York State, Wayne County, Supreme Court
+- New York State, Westchester County, Supreme Court
+- New York State, Yates County, Supreme Court
+- Arkansas State, Court of Appeals
+- Connecticut State, Appellate Court
+- District Of Columbia, Court of Appeals
+- Minnesota State, Court of Appeals
+- Missouri State, Court of Appeals, Eastern District
+- Missouri State, Court of Appeals, Southern District
+- Missouri State, Court of Appeals, Western District
+- Oregon State, Court of Appeals
+- Patent Trial and Appeal Board
+- South Carolina State, Court of Appeals
+- Texas State, Court of Criminal Appeals
+- Trademark Trial and Appeal Board
+- Virginia State, Court of Appeals
+- California State Court of Appeals, First District
+- Florida State, First District Court of Appeal
+- New York State, Appellate Division, First Department
+- Texas State, 1st Court of Appeals
+- California State Court of Appeals, Second District
+- Florida State, Second District Court of Appeal
+- New York State, Appellate Division, Second Department
+- Texas State, 2nd Court of Appeals
+- California State Court of Appeals, Third District
+- Florida State, Third District Court of Appeal
+- New York State, Appellate Division, Third Department
+- Texas State, 3rd Court of Appeals
+- California State Court of Appeals, Fourth District
+- Florida State, Fourth District Court of Appeal
+- New York State, Appellate Division, Fourth Department
+- Texas State, 4th Court of Appeals
+- California State Court of Appeals, Fifth District
+- Florida State, Fifth District Court of Appeal
+- Texas State, 5th Court of Appeals
+- California State Court of Appeals, Sixth District
+- Texas State, 6th Court of Appeals
+- Texas State, 7th Court of Appeals
+- Texas State, 8th Court of Appeals
+- Texas State, 9th Court of Appeals
+- Texas State, 10th Court of Appeals
+- Texas State, 11th Court of Appeals
+- Texas State, 12th Court of Appeals
+- Texas State, 13th Court of Appeals
+- Texas State, 14th Court of Appeals
+- Ohio State, Hamilton County, Court of Appeals
+- National Labor Relations Board
+- Georgia State, Fulton County, Traffic Violations Board
+- Arkansas State, Ashley County, Circuit Court
+- Arkansas State, Baxter County, Circuit Court
+- Arkansas State, Benton County, Circuit Court
+- Arkansas State, Boone County, Circuit Court
+- Arkansas State, Bradley County, Circuit Court
+- Arkansas State, Calhoun County, Circuit Court
+- Arkansas State, Chicot County, Circuit Court
+- Arkansas State, Clark County, Circuit Court
+- Arkansas State, Cleburne County, Circuit Court
+- Arkansas State, Cleveland County, Circuit Court
+- Arkansas State, Columbia County, Circuit Court
+- Arkansas State, Conway County, Circuit Court
+- Arkansas State, Crawford County, Circuit Court
+- Arkansas State, Crittenden County, Circuit Court
+- Arkansas State, Cross County, Circuit Court
+- Arkansas State, Dallas County, Circuit Court
+- Arkansas State, Drew County, Circuit Court
+- Arkansas State, Faulkner County, Circuit Court
+- Arkansas State, Fulton County, Circuit Court
+- Arkansas State, Garland County, Circuit Court
+- Arkansas State, Grant County, Circuit Court
+- Arkansas State, Greene County, Circuit Court
+- Arkansas State, Hempstead County, Circuit Court
+- Arkansas State, Hot Spring County, Circuit Court
+- Arkansas State, Howard County, Circuit Court
+- Arkansas State, Independence County, Circuit Court
+- Arkansas State, Izard County, Circuit Court
+- Arkansas State, Jackson County, Circuit Court
+- Arkansas State, Jefferson County, Circuit Court
+- Arkansas State, Johnson County, Circuit Court
+- Arkansas State, Lafayette County, Circuit Court
+- Arkansas State, Lawrence County, Circuit Court
+- Arkansas State, Lee County, Circuit Court
+- Arkansas State, Lincoln County, Circuit Court
+- Arkansas State, Little River County, Circuit Court
+- Arkansas State, Lonoke County, Circuit Court
+- Arkansas State, Madison County, Circuit Court
+- Arkansas State, Marion County, Circuit Court
+- Arkansas State, Miller County, Circuit Court
+- Arkansas State, Monroe County, Circuit Court
+- Arkansas State, Montgomery County, Circuit Court
+- Arkansas State, Nevada County, Circuit Court
+- Arkansas State, Newton County, Circuit Court
+- Arkansas State, Ouachita County, Circuit Court
+- Arkansas State, Perry County, Circuit Court
+- Arkansas State, Phillips County, Circuit Court
+- Arkansas State, Pike County, Circuit Court
+- Arkansas State, Poinsett County, Circuit Court
+- Arkansas State, Polk County, Circuit Court
+- Arkansas State, Pope County, Circuit Court
+- Arkansas State, Pulaski County, Circuit Court
+- Arkansas State, Randolph County, Circuit Court
+- Arkansas State, Saline County, Circuit Court
+- Arkansas State, Scott County, Circuit Court
+- Arkansas State, Searcy County, Circuit Court
+- Arkansas State, Sevier County, Circuit Court
+- Arkansas State, Sharp County, Circuit Court
+- Arkansas State, St. Francis County, Circuit Court
+- Arkansas State, Stone County, Circuit Court
+- Arkansas State, Union County, Circuit Court
+- Arkansas State, Van Buren County, Circuit Court
+- Arkansas State, Washington County, Circuit Court
+- Arkansas State, White County, Circuit Court
+- Arkansas State, Woodruff County, Circuit Court
+- Illinois State, Cook County, Circuit Court
+- Missouri State, Adair County, Circuit Court
+- Missouri State, Andrew County, Circuit Court
+- Missouri State, Atchison County, Circuit Court
+- Missouri State, Audrain County, Circuit Court
+- Missouri State, Barry County, Circuit Court
+- Missouri State, Barton County, Circuit Court
+- Missouri State, Bates County, Circuit Court
+- Missouri State, Benton County, Circuit Court
+- Missouri State, Bollinger County, Circuit Court
+- Missouri State, Boone County, Circuit Court
+- Missouri State, Buchanan County, Circuit Court
+- Missouri State, Butler County, Circuit Court
+- Missouri State, Caldwell County, Circuit Court
+- Missouri State, Callaway County, Circuit Court
+- Missouri State, Camden County, Circuit Court
+- Missouri State, Cape Girardeau County, Circuit Court
+- Missouri State, Carroll County, Circuit Court
+- Missouri State, Carter County, Circuit Court
+- Missouri State, Cass County, Circuit Court
+- Missouri State, Cedar County, Circuit Court
+- Missouri State, Chariton County, Circuit Court
+- Missouri State, Christian County, Circuit Court
+- Missouri State, Clark County, Circuit Court
+- Missouri State, Clay County, Circuit Court
+- Missouri State, Clinton County, Circuit Court
+- Missouri State, Cole County, Circuit Court
+- Missouri State, Cooper County, Circuit Court
+- Missouri State, Crawford County, Circuit Court
+- Missouri State, Dade County, Circuit Court
+- Missouri State, Dallas County, Circuit Court
+- Missouri State, Daviess County, Circuit Court
+- Missouri State, DeKalb County, Circuit Court
+- Missouri State, Dent County, Circuit Court
+- Missouri State, Douglas County, Circuit Court
+- Missouri State, Dunklin County, Circuit Court
+- Missouri State, Franklin County, Circuit Court
+- Missouri State, Gasconade County, Circuit Court
+- Missouri State, Gentry County, Circuit Court
+- Missouri State, Greene County, Circuit Court
+- Missouri State, Grundy County, Circuit Court
+- Missouri State, Harrison County, Circuit Court
+- Missouri State, Henry County, Circuit Court
+- Missouri State, Hickory County, Circuit Court
+- Missouri State, Holt County, Circuit Court
+- Missouri State, Howard County, Circuit Court
+- Missouri State, Howell County, Circuit Court
+- Missouri State, Iron County, Circuit Court
+- Missouri State, Jackson County, Circuit Court
+- Missouri State, Jasper County, Circuit Court
+- Missouri State, Jefferson County, Circuit Court
+- Missouri State, Johnson County, Circuit Court
+- Missouri State, Knox County, Circuit Court
+- Missouri State, Laclede County, Circuit Court
+- Missouri State, Lafayette County, Circuit Court
+- Missouri State, Lawrence County, Circuit Court
+- Missouri State, Lewis County, Circuit Court
+- Missouri State, Lincoln County, Circuit Court
+- Missouri State, Linn County, Circuit Court
+- Missouri State, Livingston County, Circuit Court
+- Missouri State, Macon County, Circuit Court
+- Missouri State, Madison County, Circuit Court
+- Missouri State, Maries County, Circuit Court
+- Missouri State, Marion County, Circuit Court
+- Missouri State, McDonald County, Circuit Court
+- Missouri State, Mercer County, Circuit Court
+- Missouri State, Miller County, Circuit Court
+- Missouri State, Mississippi County, Circuit Court
+- Missouri State, Moniteau County, Circuit Court
+- Missouri State, Monroe County, Circuit Court
+- Missouri State, Montgomery County, Circuit Court
+- Missouri State, Morgan County, Circuit Court
+- Missouri State, New Madrid County, Circuit Court
+- Missouri State, Newton County, Circuit Court
+- Missouri State, Nodaway County, Circuit Court
+- Missouri State, Oregon County, Circuit Court
+- Missouri State, Osage County, Circuit Court
+- Missouri State, Ozark County, Circuit Court
+- Missouri State, Pemiscot County, Circuit Court
+- Missouri State, Perry County, Circuit Court
+- Missouri State, Pettis County, Circuit Court
+- Missouri State, Phelps County, Circuit Court
+- Missouri State, Pike County, Circuit Court
+- Missouri State, Platte County, Circuit Court
+- Missouri State, Polk County, Circuit Court
+- Missouri State, Pulaski County, Circuit Court
+- Missouri State, Putnam County, Circuit Court
+- Missouri State, Ralls County, Circuit Court
+- Missouri State, Randolph County, Circuit Court
+- Missouri State, Ray County, Circuit Court
+- Missouri State, Reynolds County, Circuit Court
+- Missouri State, Ripley County, Circuit Court
+- Missouri State, Saline County, Circuit Court
+- Missouri State, Schuyler County, Circuit Court
+- Missouri State, Scotland County, Circuit Court
+- Missouri State, Scott County, Circuit Court
+- Missouri State, Shannon County, Circuit Court
+- Missouri State, Shelby County, Circuit Court
+- Missouri State, St. Charles County, Circuit Court
+- Missouri State, St. Clair County, Circuit Court
+- Missouri State, St. Francois County, Circuit Court
+- Missouri State, St. Louis County, Circuit Court
+- Missouri State, Ste. Genevieve County, Circuit Court
+- Missouri State, Stoddard County, Circuit Court
+- Missouri State, Stone County, Circuit Court
+- Missouri State, Sullivan County, Circuit Court
+- Missouri State, Taney County, Circuit Court
+- Missouri State, Texas County, Circuit Court
+- Missouri State, The City of St. Louis County, Circuit Court
+- Missouri State, Vernon County, Circuit Court
+- Missouri State, Warren County, Circuit Court
+- Missouri State, Washington County, Circuit Court
+- Missouri State, Wayne County, Circuit Court
+- Missouri State, Webster County, Circuit Court
+- Missouri State, Worth County, Circuit Court
+- Missouri State, Wright County, Circuit Court
+- Oregon State, Baker County, Circuit Court
+- Oregon State, Benton County, Circuit Court
+- Oregon State, Clackamas County, Circuit Court
+- Oregon State, Clatsop County, Circuit Court
+- Oregon State, Columbia County, Circuit Court
+- Oregon State, Coos County, Circuit Court
+- Oregon State, Crook County, Circuit Court
+- Oregon State, Curry County, Circuit Court
+- Oregon State, Deschutes County, Circuit Court
+- Oregon State, Douglas County, Circuit Court
+- Oregon State, Gilliam County, Circuit Court
+- Oregon State, Grant County, Circuit Court
+- Oregon State, Harney County, Circuit Court
+- Oregon State, Hood River County, Circuit Court
+- Oregon State, Jackson County, Circuit Court
+- Oregon State, Jefferson County, Circuit Court
+- Oregon State, Josephine County, Circuit Court
+- Oregon State, Klamath County, Circuit Court
+- Oregon State, Lake County, Circuit Court
+- Oregon State, Lane County, Circuit Court
+- Oregon State, Lincoln County, Circuit Court
+- Oregon State, Linn County, Circuit Court
+- Oregon State, Malheur County, Circuit Court
+- Oregon State, Marion County, Circuit Court
+- Oregon State, Morrow County, Circuit Court
+- Oregon State, Multnomah County, Circuit Court
+- Oregon State, Polk County, Circuit Court
+- Oregon State, Sherman County, Circuit Court
+- Oregon State, Tillamook County, Circuit Court
+- Oregon State, Umatilla County, Circuit Court
+- Oregon State, Union County, Circuit Court
+- Oregon State, Wallowa County, Circuit Court
+- Oregon State, Wasco County, Circuit Court
+- Oregon State, Washington County, Circuit Court
+- Oregon State, Wheeler County, Circuit Court
+- Oregon State, Yamhill County, Circuit Court
+- Virginia State, Circuit Court, Accomack County
+- Virginia State, Circuit Court, Albemarle County
+- Virginia State, Circuit Court, Alleghany County
+- Virginia State, Circuit Court, Amelia County
+- Virginia State, Circuit Court, Amherst County
+- Virginia State, Circuit Court, Appomattox County
+- Virginia State, Circuit Court, Arlington County
+- Virginia State, Circuit Court, Augusta County
+- Virginia State, Circuit Court, Bath County
+- Virginia State, Circuit Court, Bedford County
+- Virginia State, Circuit Court, Bland County
+- Virginia State, Circuit Court, Botetourt County
+- Virginia State, Circuit Court, Bristol County
+- Virginia State, Circuit Court, Brunswick County
+- Virginia State, Circuit Court, Buchanan County
+- Virginia State, Circuit Court, Buckingham County
+- Virginia State, Circuit Court, Buena Vista County
+- Virginia State, Circuit Court, Campbell County
+- Virginia State, Circuit Court, Caroline County
+- Virginia State, Circuit Court, Carroll County
+- Virginia State, Circuit Court, Charles City County
+- Virginia State, Circuit Court, Charlotte County
+- Virginia State, Circuit Court, Charlottesville County
+- Virginia State, Circuit Court, Chesapeake County
+- Virginia State, Circuit Court, Chesterfield County
+- Virginia State, Circuit Court, Clarke County
+- Virginia State, Circuit Court, Clifton Forge County
+- Virginia State, Circuit Court, Colonial Heights County
+- Virginia State, Circuit Court, Craig County
+- Virginia State, Circuit Court, Culpeper County
+- Virginia State, Circuit Court, Cumberland County
+- Virginia State, Circuit Court, Danville County
+- Virginia State, Circuit Court, Dickenson County
+- Virginia State, Circuit Court, Dinwiddie County
+- Virginia State, Circuit Court, Essex County
+- Virginia State, Circuit Court, Fauquier County
+- Virginia State, Circuit Court, Floyd County
+- Virginia State, Circuit Court, Fluvanna County
+- Virginia State, Circuit Court, Franklin County
+- Virginia State, Circuit Court, Frederick County
+- Virginia State, Circuit Court, Fredericksburg County
+- Virginia State, Circuit Court, Giles County
+- Virginia State, Circuit Court, Gloucester County
+- Virginia State, Circuit Court, Goochland County
+- Virginia State, Circuit Court, Grayson County
+- Virginia State, Circuit Court, Greene County
+- Virginia State, Circuit Court, Greensville County
+- Virginia State, Circuit Court, Halifax County
+- Virginia State, Circuit Court, Hampton County
+- Virginia State, Circuit Court, Hanover County
+- Virginia State, Circuit Court, Henrico County
+- Virginia State, Circuit Court, Henry County
+- Virginia State, Circuit Court, Highland County
+- Virginia State, Circuit Court, Hopewell County
+- Virginia State, Circuit Court, Isle of Wight County
+- Virginia State, Circuit Court, King George County
+- Virginia State, Circuit Court, King William County
+- Virginia State, Circuit Court, King and Queen County
+- Virginia State, Circuit Court, Lancaster County
+- Virginia State, Circuit Court, Lee County
+- Virginia State, Circuit Court, Loudoun County
+- Virginia State, Circuit Court, Louisa County
+- Virginia State, Circuit Court, Lunenburg County
+- Virginia State, Circuit Court, Lynchburg County
+- Virginia State, Circuit Court, Madison County
+- Virginia State, Circuit Court, Martinsville County
+- Virginia State, Circuit Court, Mathews County
+- Virginia State, Circuit Court, Mecklenburg County
+- Virginia State, Circuit Court, Middlesex County
+- Virginia State, Circuit Court, Montgomery County
+- Virginia State, Circuit Court, Nelson County
+- Virginia State, Circuit Court, New Kent County
+- Virginia State, Circuit Court, Newport News County
+- Virginia State, Circuit Court, Norfolk County
+- Virginia State, Circuit Court, Northampton County
+- Virginia State, Circuit Court, Northumberland County
+- Virginia State, Circuit Court, Nottoway County
+- Virginia State, Circuit Court, Orange County
+- Virginia State, Circuit Court, Page County
+- Virginia State, Circuit Court, Patrick County
+- Virginia State, Circuit Court, Petersburg County
+- Virginia State, Circuit Court, Pittsylvania County
+- Virginia State, Circuit Court, Portsmouth County
+- Virginia State, Circuit Court, Powhatan County
+- Virginia State, Circuit Court, Prince Edward County
+- Virginia State, Circuit Court, Prince George County
+- Virginia State, Circuit Court, Prince William County
+- Virginia State, Circuit Court, Pulaski County
+- Virginia State, Circuit Court, Radford County
+- Virginia State, Circuit Court, Rappahannock County
+- Virginia State, Circuit Court, Richmond City County
+- Virginia State, Circuit Court, Richmond County County
+- Virginia State, Circuit Court, Roanoke City County
+- Virginia State, Circuit Court, Roanoke County County
+- Virginia State, Circuit Court, Rockbridge County
+- Virginia State, Circuit Court, Rockingham County
+- Virginia State, Circuit Court, Russell County
+- Virginia State, Circuit Court, Salem County
+- Virginia State, Circuit Court, Scott County
+- Virginia State, Circuit Court, Shenandoah County
+- Virginia State, Circuit Court, Smyth County
+- Virginia State, Circuit Court, Southampton County
+- Virginia State, Circuit Court, Spotsylvania County
+- Virginia State, Circuit Court, Stafford County
+- Virginia State, Circuit Court, Staunton County
+- Virginia State, Circuit Court, Suffolk County
+- Virginia State, Circuit Court, Surry County
+- Virginia State, Circuit Court, Sussex County
+- Virginia State, Circuit Court, Tazewell County
+- Virginia State, Circuit Court, Virginia Beach County
+- Virginia State, Circuit Court, Warren County
+- Virginia State, Circuit Court, Washington County
+- Virginia State, Circuit Court, Waynesboro County
+- Virginia State, Circuit Court, Westmoreland County
+- Virginia State, Circuit Court, Williamsburg-James City County
+- Virginia State, Circuit Court, Winchester County
+- Virginia State, Circuit Court, Wise County
+- Virginia State, Circuit Court, Wythe County
+- Virginia State, Circuit Court, York County-Poquoson County
+- Florida State, Duval County, Fourth Circuit Court
+- Florida State, Miami-Dade County, Eleventh Circuit Court
+- Florida State, Hillsborough County, Thirteenth Circuit Court
+- Florida State, Broward County, Seventeenth Circuit Court
+- U.S. Patent Application
+- United States International Trade Commission
+- United States Tax Court
+- Connecticut State, Probate Court
+- Connecticut State, Superior Court
+- Delaware State, Court of Chancery
+- Federal Trade Commission
+- Idaho State, District Court
+- Idaho State, Juvenile Court
+- Idaho State, Magistrate Court
+- Missouri State, Fine Collection Center
+- New Jersey State, Superior Court
+- New Jersey State, Tax Court
+- New York State, Albany City Court
+- New York State, Amsterdam City Court
+- New York State, Auburn City Court
+- New York State, Batavia City Court
+- New York State, Beacon City Court
+- New York State, Binghamton City Court
+- New York State, Buffalo City Court
+- New York State, Buffalo City Court Violations
+- New York State, Canandaigua City Court
+- New York State, Cohoes City Court
+- New York State, Corning City Court
+- New York State, Cortland City Court
+- New York State, Court of Claims
+- New York State, Dunkirk City Court
+- New York State, Elmira City Court
+- New York State, Fulton City Court
+- New York State, Geneva City Court
+- New York State, Glen Cove City Court
+- New York State, Glens Falls City Court
+- New York State, Gloversville City Court
+- New York State, Harlem Community Justice Center
+- New York State, Hornell City Court
+- New York State, Hudson City Court
+- New York State, Ithaca City Court
+- New York State, Jamestown City Court
+- New York State, Johnstown City Court
+- New York State, Kingston City Court
+- New York State, Lackawanna City Court
+- New York State, Little Falls City Court
+- New York State, Lockport City Court
+- New York State, Long Beach City Court
+- New York State, Mechanicville City Court
+- New York State, Middletown City Court
+- New York State, Mt. Vernon City Court
+- New York State, New Rochelle City Court
+- New York State, Newburgh City Court
+- New York State, Niagara Falls City Court
+- New York State, North Tonawanda City Court
+- New York State, Norwich City Court
+- New York State, Ogdensburg City Court
+- New York State, Olean City Court
+- New York State, Oneida City Court
+- New York State, Oneonta City Court
+- New York State, Oswego City Court
+- New York State, Peekskill City Court
+- New York State, Plattsburgh City Court
+- New York State, Port Jervis City Court
+- New York State, Poughkeepsie City Court
+- New York State, Redhook Community Justice Center
+- New York State, Rensselaer City Court
+- New York State, Rochester City Court
+- New York State, Rome City Court
+- New York State, Rye City Court
+- New York State, Salamanca City Court
+- New York State, Saratoga Springs City Court
+- New York State, Schenectady City Court
+- New York State, Sherrill City Court
+- New York State, Syracuse City Court
+- New York State, Tonawanda City Court
+- New York State, Troy City Court
+- New York State, Utica City Court
+- New York State, Watertown City Court
+- New York State, Watervliet City Court
+- New York State, White Plains City Court
+- New York State, Yonkers City Court
+- Ohio State, Court of Claims
+- Orange Book
+- Pennsylvania State, Commonwealth Court
+- Pennsylvania State, Superior Court
+- Trademark
+- Arkansas State, Arkansas County, District Court
+- Arkansas State, Arkansas County, District Court
+- Arkansas State, Arkansas County, District Court
+- Arkansas State, Arkansas County, District Court
+- Arkansas State, Carroll County, District Court
+- Arkansas State, Carroll County, District Court
+- Arkansas State, Clark County, District Court
+- Arkansas State, Clay County, District Court
+- Arkansas State, Clay County, District Court
+- Arkansas State, Craighead County, District Court
+- Arkansas State, Craighead County, District Court
+- Arkansas State, Craighead County, District Court
+- Arkansas State, Craighead County, District Court
+- Arkansas State, Crawford County, District Court
+- Arkansas State, Crittenden County, District Court
+- Arkansas State, Crittenden County, District Court
+- Arkansas State, Desha County, District Court
+- Arkansas State, Desha County, District Court
+- Arkansas State, Faulkner County, District Court
+- Arkansas State, Faulkner County, District Court
+- Arkansas State, Faulkner County, District Court
+- Arkansas State, Faulkner County, District Court
+- Arkansas State, Faulkner County, District Court
+- Arkansas State, Franklin County, District Court
+- Arkansas State, Franklin County, District Court
+- Arkansas State, Garland County, District Court
+- Arkansas State, Hot Spring County, District Court
+- Arkansas State, Independence County, District Court
+- Arkansas State, Logan County, District Court
+- Arkansas State, Logan County, District Court
+- Arkansas State, Mississippi County, District Court
+- Arkansas State, Mississippi County, District Court
+- Arkansas State, Mississippi County, District Court
+- Arkansas State, Poinsett County, District Court
+- Arkansas State, Polk County, District Court
+- Arkansas State, Prairie County, District Court
+- Arkansas State, Prairie County, District Court
+- Arkansas State, Pulaski County, District Court
+- Arkansas State, Pulaski County, District Court
+- Arkansas State, Sebastian County, District Court
+- Arkansas State, Sebastian County, District Court
+- Arkansas State, Van Buren County, District Court
+- Arkansas State, Van Buren County, District Court
+- Arkansas State, White County, District Court
+- Arkansas State, Yell County, District Court
+- Arkansas State, Yell County, District Court
+- California State, Alameda County, Superior Court
+- California State, Butte County, Superior Court
+- California State, Calaveras County, Superior Court
+- California State, Contra Costa County, Superior Court
+- California State, Fresno County, Superior Court
+- California State, Kern County, Superior Court
+- California State, Kings County, Superior Court
+- California State, Los Angeles County, Superior Court
+- California State, Marin County, Superior Court
+- California State, Merced County, Superior Court
+- California State, Napa County, Superior Court
+- California State, Orange County, Superior Court
+- California State, Riverside County, Superior Court
+- California State, Sacramento County, Superior Court
+- California State, San Bernardino County, Superior Court
+- California State, San Diego County, Superior Court
+- California State, San Francisco County, Superior Court
+- California State, San Mateo County, Superior Court
+- California State, Santa Barbara County, Superior Court
+- California State, Santa Clara County, Superior Court
+- California State, Santa Cruz County, Superior Court
+- California State, Ventura County, Superior Court
+- California State, Yuba County, Superior Court
+- Delaware State, Court of Common Pleas, Kent County
+- Delaware State, Court of Common Pleas, New Castle County
+- Delaware State, Court of Common Pleas, Sussex County
+- Delaware State, Justice of the Peace, Dover County
+- Delaware State, Justice of the Peace, Dover County
+- Delaware State, Justice of the Peace, Georgetown County
+- Delaware State, Justice of the Peace, Georgetown County
+- Delaware State, Justice of the Peace, Georgetown County
+- Delaware State, Justice of the Peace, Harrington County
+- Delaware State, Justice of the Peace, Middletown County
+- Delaware State, Justice of the Peace, New Castle County
+- Delaware State, Justice of the Peace, Price's Corner County
+- Delaware State, Justice of the Peace, Rehoboth County
+- Delaware State, Justice of the Peace, Seaford County
+- Delaware State, Justice of the Peace, Smyrna County
+- Delaware State, Justice of the Peace, Wilmington County
+- Delaware State, Justice of the Peace, Wilmington County
+- Delaware State, Superior Court, Kent County
+- Delaware State, Superior Court, New Castle County
+- Delaware State, Superior Court, Sussex County
+- Florida State, Baker County
+- Florida State, Bradford County
+- Florida State, Broward County, County Court
+- Florida State, Calhoun County
+- Florida State, Columbia County
+- Florida State, DeSoto County
+- Florida State, Dixie County
+- Florida State, Duval County, County Court
+- Florida State, Franklin County
+- Florida State, Gilchrist County
+- Florida State, Glades County
+- Florida State, Gulf County
+- Florida State, Hamilton County
+- Florida State, Hardee County
+- Florida State, Hendry County
+- Florida State, Hernando County
+- Florida State, Highlands County
+- Florida State, Hillsborough County, County Court
+- Florida State, Holmes County
+- Florida State, Jackson County
+- Florida State, Jefferson County
+- Florida State, Lafayette County
+- Florida State, Liberty County
+- Florida State, Madison County
+- Florida State, Marion County
+- Florida State, Martin County
+- Florida State, Miami-Dade County, County Court
+- Florida State, Nassau County
+- Florida State, Okeechobee County
+- Florida State, Pasco County
+- Florida State, Pinellas County
+- Florida State, Putnam County
+- Florida State, Santarosa County
+- Florida State, Sumter County
+- Florida State, Union County
+- Florida State, Wakulla County
+- Florida State, Walton County
+- Florida State, Washington County
+- Georgia State, Appling County, State Court
+- Georgia State, Appling County, Superior Court
+- Georgia State, Atkinson County, Superior Court
+- Georgia State, Bacon County, State Court
+- Georgia State, Bacon County, Superior Court
+- Georgia State, Baker County, Superior Court
+- Georgia State, Baldwin County, State Court
+- Georgia State, Baldwin County, Superior Court
+- Georgia State, Banks County, Superior Court
+- Georgia State, Barrow County, Superior Court
+- Georgia State, Bartow County, Superior Court
+- Georgia State, Ben Hill County, Superior Court
+- Georgia State, Berrien County, Superior Court
+- Georgia State, Bibb County, State Court
+- Georgia State, Bleckley County, Superior Court
+- Georgia State, Brantley County, Superior Court
+- Georgia State, Brooks County, State Court
+- Georgia State, Brooks County, Superior Court
+- Georgia State, Bryan County, State Court
+- Georgia State, Bryan County, Superior Court
+- Georgia State, Bulloch County, State Court
+- Georgia State, Bulloch County, Superior Court
+- Georgia State, Burke County, State Court
+- Georgia State, Burke County, Superior Court
+- Georgia State, Butts County, Superior Court
+- Georgia State, Calhoun County, Superior Court
+- Georgia State, Camden County, Superior Court
+- Georgia State, Candler County, State Court
+- Georgia State, Candler County, Superior Court
+- Georgia State, Carroll County, State Court
+- Georgia State, Carroll County, Superior Court
+- Georgia State, Catoosa County, State Court
+- Georgia State, Catoosa County, Superior Court
+- Georgia State, Charlton County, State Court
+- Georgia State, Charlton County, Superior Court
+- Georgia State, Chattahoochee County, Superior Court
+- Georgia State, Chattooga County, State Court
+- Georgia State, Chattooga County, Superior Court
+- Georgia State, Clarke County, State Court
+- Georgia State, Clarke County, Superior Court
+- Georgia State, Clay County, Superior Court
+- Georgia State, Clinch County, Superior Court
+- Georgia State, Cobb County, State Court
+- Georgia State, Cobb County, Superior Court
+- Georgia State, Coffee County, State Court
+- Georgia State, Coffee County, Superior Court
+- Georgia State, Colquitt County, State Court
+- Georgia State, Colquitt County, Superior Court
+- Georgia State, Columbia County, Superior Court
+- Georgia State, Cook County, Superior Court
+- Georgia State, Coweta County, Superior Court
+- Georgia State, Crawford County, Superior Court
+- Georgia State, Crisp County, Superior Court
+- Georgia State, Dade County, Superior Court
+- Georgia State, Dawson County, Superior Court
+- Georgia State, Decatur County, State Court
+- Georgia State, Decatur County, Superior Court
+- Georgia State, Dodge County, Superior Court
+- Georgia State, Dooly County, Superior Court
+- Georgia State, Dougherty County, State Court
+- Georgia State, Dougherty County, Superior Court
+- Georgia State, Early County, State Court
+- Georgia State, Early County, Superior Court
+- Georgia State, Echols County, Superior Court
+- Georgia State, Effingham County, State Court
+- Georgia State, Effingham County, Superior Court
+- Georgia State, Elbert County, State Court
+- Georgia State, Elbert County, Superior Court
+- Georgia State, Emanuel County, State Court
+- Georgia State, Emanuel County, Superior Court
+- Georgia State, Evans County, State Court
+- Georgia State, Evans County, Superior Court
+- Georgia State, Fannin County, Superior Court
+- Georgia State, Fayette County, State Court
+- Georgia State, Fayette County, Superior Court
+- Georgia State, Forsyth County, State Court
+- Georgia State, Forsyth County, Superior Court
+- Georgia State, Franklin County, Superior Court
+- Georgia State, Fulton County, Magistrate Court
+- Georgia State, Fulton County, State Court
+- Georgia State, Fulton County, Superior Court
+- Georgia State, Gilmer County, Superior Court
+- Georgia State, Glascock County, Superior Court
+- Georgia State, Gordon County, Superior Court
+- Georgia State, Grady County, State Court
+- Georgia State, Grady County, Superior Court
+- Georgia State, Greene County, Superior Court
+- Georgia State, Habersham County, State Court
+- Georgia State, Habersham County, Superior Court
+- Georgia State, Hall County, State Court
+- Georgia State, Hall County, Superior Court
+- Georgia State, Hancock County, Superior Court
+- Georgia State, Haralson County, Superior Court
+- Georgia State, Harris County, Superior Court
+- Georgia State, Hart County, Superior Court
+- Georgia State, Heard County, Superior Court
+- Georgia State, Henry County, State Court
+- Georgia State, Henry County, Superior Court
+- Georgia State, Houston County, State Court
+- Georgia State, Houston County, Superior Court
+- Georgia State, Irwin County, Superior Court
+- Georgia State, Jackson County, State Court
+- Georgia State, Jackson County, Superior Court
+- Georgia State, Jasper County, Superior Court
+- Georgia State, Jeff Davis County, State Court
+- Georgia State, Jeff Davis County, Superior Court
+- Georgia State, Jefferson County, State Court
+- Georgia State, Jefferson County, Superior Court
+- Georgia State, Jenkins County, State Court
+- Georgia State, Jenkins County, Superior Court
+- Georgia State, Johnson County, Superior Court
+- Georgia State, Jones County, Superior Court
+- Georgia State, Lamar County, Superior Court
+- Georgia State, Lanier County, Superior Court
+- Georgia State, Laurens County, Superior Court
+- Georgia State, Lee County, Superior Court
+- Georgia State, Liberty County, State Court
+- Georgia State, Liberty County, Superior Court
+- Georgia State, Lincoln County, Superior Court
+- Georgia State, Long County, State Court
+- Georgia State, Long County, Superior Court
+- Georgia State, Lumpkin County, Superior Court
+- Georgia State, Macon County, Superior Court
+- Georgia State, Madison County, Superior Court
+- Georgia State, Marion County, Superior Court
+- Georgia State, McDuffie County, Superior Court
+- Georgia State, McIntosh County, State Court
+- Georgia State, McIntosh County, Superior Court
+- Georgia State, Meriwether County, Superior Court
+- Georgia State, Miller County, State Court
+- Georgia State, Miller County, Superior Court
+- Georgia State, Mitchell County, State Court
+- Georgia State, Mitchell County, Superior Court
+- Georgia State, Monroe County, Superior Court
+- Georgia State, Montgomery County, Superior Court
+- Georgia State, Morgan County, Superior Court
+- Georgia State, Murray County, Superior Court
+- Georgia State, Muscogee County, State Court
+- Georgia State, Muscogee County, Superior Court
+- Georgia State, Newton County, Superior Court
+- Georgia State, Oconee County, Magistrate Court
+- Georgia State, Oconee County, Superior Court
+- Georgia State, Oglethorpe County, Superior Court
+- Georgia State, Paulding County, Superior Court
+- Georgia State, Peach County, Superior Court
+- Georgia State, Pickens County, Superior Court
+- Georgia State, Pierce County, State Court
+- Georgia State, Pierce County, Superior Court
+- Georgia State, Pike County, Superior Court
+- Georgia State, Polk County, Superior Court
+- Georgia State, Pulaski County, Superior Court
+- Georgia State, Putnam County, State Court
+- Georgia State, Putnam County, Superior Court
+- Georgia State, Quitman County, Superior Court
+- Georgia State, Rabun County, Superior Court
+- Georgia State, Randolph County, Superior Court
+- Georgia State, Richmond County, State Court
+- Georgia State, Richmond County, Superior Court
+- Georgia State, Schley County, Superior Court
+- Georgia State, Screven County, State Court
+- Georgia State, Screven County, Superior Court
+- Georgia State, Seminole County, Superior Court
+- Georgia State, Spalding County, State Court
+- Georgia State, Spalding County, Superior Court
+- Georgia State, Stephens County, State Court
+- Georgia State, Stephens County, Superior Court
+- Georgia State, Stewart County, Superior Court
+- Georgia State, Sumter County, State Court
+- Georgia State, Sumter County, Superior Court
+- Georgia State, Talbot County, Superior Court
+- Georgia State, Taliaferro County, Superior Court
+- Georgia State, Tattnall County, State Court
+- Georgia State, Tattnall County, Superior Court
+- Georgia State, Taylor County, Superior Court
+- Georgia State, Telfair County, Superior Court
+- Georgia State, Terrell County, Superior Court
+- Georgia State, Thomas County, State Court
+- Georgia State, Thomas County, Superior Court
+- Georgia State, Tift County, State Court
+- Georgia State, Tift County, Superior Court
+- Georgia State, Toombs County, State Court
+- Georgia State, Toombs County, Superior Court
+- Georgia State, Towns County, Superior Court
+- Georgia State, Treutlen County, State Court
+- Georgia State, Treutlen County, Superior Court
+- Georgia State, Troup County, State Court
+- Georgia State, Troup County, Superior Court
+- Georgia State, Turner County, State Court
+- Georgia State, Turner County, Superior Court
+- Georgia State, Twiggs County, Superior Court
+- Georgia State, Union County, Superior Court
+- Georgia State, Upson County, Superior Court
+- Georgia State, Walker County, State Court
+- Georgia State, Walker County, Superior Court
+- Georgia State, Walton County, Superior Court
+- Georgia State, Ware County, State Court
+- Georgia State, Ware County, Superior Court
+- Georgia State, Warren County, Superior Court
+- Georgia State, Washington County, State Court
+- Georgia State, Washington County, Superior Court
+- Georgia State, Wayne County, State Court
+- Georgia State, Wayne County, Superior Court
+- Georgia State, Webster County, Superior Court
+- Georgia State, Wheeler County, Superior Court
+- Georgia State, White County, Superior Court
+- Georgia State, Whitfield County, Superior Court
+- Georgia State, Wilcox County, Superior Court
+- Georgia State, Wilkes County, Superior Court
+- Georgia State, Wilkinson County, Superior Court
+- Georgia State, Worth County, State Court
+- Georgia State, Worth County, Superior Court
+- Minnesota State, Aitkin County, District Court
+- Minnesota State, Anoka County, District Court
+- Minnesota State, Becker County, District Court
+- Minnesota State, Beltrami County, District Court
+- Minnesota State, Benton County, District Court
+- Minnesota State, Big Stone County, District Court
+- Minnesota State, Blue Earth County, District Court
+- Minnesota State, Brown County, District Court
+- Minnesota State, Carlton County, District Court
+- Minnesota State, Carver County, District Court
+- Minnesota State, Cass County, District Court
+- Minnesota State, Chippewa County, District Court
+- Minnesota State, Chisago County, District Court
+- Minnesota State, Clay County, District Court
+- Minnesota State, Clearwater County, District Court
+- Minnesota State, Cook County, District Court
+- Minnesota State, Cottonwood County, District Court
+- Minnesota State, Crow Wing County, District Court
+- Minnesota State, Dakota County, District Court
+- Minnesota State, Dodge County, District Court
+- Minnesota State, Douglas County, District Court
+- Minnesota State, Faribault County, District Court
+- Minnesota State, Fillmore County, District Court
+- Minnesota State, Freeborn County, District Court
+- Minnesota State, Goodhue County, District Court
+- Minnesota State, Grant County, District Court
+- Minnesota State, Hennepin County, District Court
+- Minnesota State, Houston County, District Court
+- Minnesota State, Hubbard County, District Court
+- Minnesota State, Isanti County, District Court
+- Minnesota State, Itasca County, District Court
+- Minnesota State, Jackson County, District Court
+- Minnesota State, Kanabec County, District Court
+- Minnesota State, Kandiyohi County, District Court
+- Minnesota State, Kittson County, District Court
+- Minnesota State, Koochiching County, District Court
+- Minnesota State, Lac Qui Parle County, District Court
+- Minnesota State, Lake County, District Court
+- Minnesota State, Lake of the Woods County, District Court
+- Minnesota State, LeSueur County, District Court
+- Minnesota State, Lincoln County, District Court
+- Minnesota State, Lyon County, District Court
+- Minnesota State, Mahnomen County, District Court
+- Minnesota State, Marshall County, District Court
+- Minnesota State, Martin County, District Court
+- Minnesota State, McLeod County, District Court
+- Minnesota State, Meeker County, District Court
+- Minnesota State, Mille Lacs County, District Court
+- Minnesota State, Morrison County, District Court
+- Minnesota State, Mower County, District Court
+- Minnesota State, Murray County, District Court
+- Minnesota State, Nicollet County, District Court
+- Minnesota State, Nobles County, District Court
+- Minnesota State, Norman County, District Court
+- Minnesota State, Olmsted County, District Court
+- Minnesota State, Otter Tail County, District Court
+- Minnesota State, Pennington County, District Court
+- Minnesota State, Pine County, District Court
+- Minnesota State, Pipestone County, District Court
+- Minnesota State, Polk County, District Court
+- Minnesota State, Pope County, District Court
+- Minnesota State, Ramsey County, District Court
+- Minnesota State, Red Lake County, District Court
+- Minnesota State, Redwood County, District Court
+- Minnesota State, Renville County, District Court
+- Minnesota State, Rice County, District Court
+- Minnesota State, Rock County, District Court
+- Minnesota State, Roseau County, District Court
+- Minnesota State, Scott County, District Court
+- Minnesota State, Sherburne County, District Court
+- Minnesota State, Sibley County, District Court
+- Minnesota State, St. Louis County, District Court
+- Minnesota State, Stearns County, District Court
+- Minnesota State, Steele County, District Court
+- Minnesota State, Stevens County, District Court
+- Minnesota State, Swift County, District Court
+- Minnesota State, Todd County, District Court
+- Minnesota State, Traverse County, District Court
+- Minnesota State, Wabasha County, District Court
+- Minnesota State, Wadena County, District Court
+- Minnesota State, Waseca County, District Court
+- Minnesota State, Washington County, District Court
+- Minnesota State, Watonwan County, District Court
+- Minnesota State, Wilkin County, District Court
+- Minnesota State, Winona County, District Court
+- Minnesota State, Wright County, District Court
+- Minnesota State, Yellow Medicine County, District Court
+- Nevada State, Clark County
+- Nevada State, Las Vegas Township
+- New Mexico State, Bernalillo County, Metropolitan Court
+- New Mexico State, Catron County, Magistrate Court
+- New Mexico State, Chaves County, Magistrate Court
+- New Mexico State, Cibola County, Magistrate Court
+- New Mexico State, Colfax County, Magistrate Court
+- New Mexico State, Curry County, Magistrate Court
+- New Mexico State, DeBaca County, Magistrate Court
+- New Mexico State, Dona Ana County, Magistrate Court
+- New Mexico State, Eddy County, Magistrate Court
+- New Mexico State, Grant County, Magistrate Court
+- New Mexico State, Guadalupe County, Magistrate Court
+- New Mexico State, Harding County, Magistrate Court
+- New Mexico State, Hidalgo County, Magistrate Court
+- New Mexico State, Lea County, Magistrate Court
+- New Mexico State, Lincoln County, Magistrate Court
+- New Mexico State, Los Alamos County, Magistrate Court
+- New Mexico State, Luna County, Magistrate Court
+- New Mexico State, McKinley County, Magistrate Court
+- New Mexico State, Mora County, Magistrate Court
+- New Mexico State, Otero County, Magistrate Court
+- New Mexico State, Quay County, Magistrate Court
+- New Mexico State, Rio Arriba County, Magistrate Court
+- New Mexico State, Roosevelt County, Magistrate Court
+- New Mexico State, San Juan County, Magistrate Court
+- New Mexico State, San Miguel County, Magistrate Court
+- New Mexico State, Sandoval County, Magistrate Court
+- New Mexico State, Santa Fe County, Magistrate Court
+- New Mexico State, Sierra County, Magistrate Court
+- New Mexico State, Socorro County, Magistrate Court
+- New Mexico State, Taos County, Magistrate Court
+- New Mexico State, Torrance County, Magistrate Court
+- New Mexico State, Union County, Magistrate Court
+- New Mexico State, Valencia County, Magistrate Court
+- New York State, Bronx County Civil Court
+- New York State, Kings County Civil Court
+- New York State, New York County Civil Court
+- New York State, Queens County Civil Court
+- New York State, Richmond County Civil Court
+- Ohio State, Cuyahoga County, Court of Common Pleas
+- Ohio State, Hamilton County, Court of Common Pleas
+- Ohio State, Hamilton County, Municipal Court
+- Pennsylvania State, Court of Common Pleas, Adams County
+- Pennsylvania State, Court of Common Pleas, Allegheny County
+- Pennsylvania State, Court of Common Pleas, Armstrong County
+- Pennsylvania State, Court of Common Pleas, Beaver County
+- Pennsylvania State, Court of Common Pleas, Bedford County
+- Pennsylvania State, Court of Common Pleas, Berks County
+- Pennsylvania State, Court of Common Pleas, Blair County
+- Pennsylvania State, Court of Common Pleas, Bradford County
+- Pennsylvania State, Court of Common Pleas, Bucks County
+- Pennsylvania State, Court of Common Pleas, Butler County
+- Pennsylvania State, Court of Common Pleas, Cambria County
+- Pennsylvania State, Court of Common Pleas, Cameron County
+- Pennsylvania State, Court of Common Pleas, Carbon County
+- Pennsylvania State, Court of Common Pleas, Centre County
+- Pennsylvania State, Court of Common Pleas, Chester County
+- Pennsylvania State, Court of Common Pleas, Clarion County
+- Pennsylvania State, Court of Common Pleas, Clearfield County
+- Pennsylvania State, Court of Common Pleas, Clinton County
+- Pennsylvania State, Court of Common Pleas, Columbia County
+- Pennsylvania State, Court of Common Pleas, Crawford County
+- Pennsylvania State, Court of Common Pleas, Cumberland County
+- Pennsylvania State, Court of Common Pleas, Dauphin County
+- Pennsylvania State, Court of Common Pleas, Delaware County
+- Pennsylvania State, Court of Common Pleas, Elk County
+- Pennsylvania State, Court of Common Pleas, Erie County
+- Pennsylvania State, Court of Common Pleas, Fayette County
+- Pennsylvania State, Court of Common Pleas, Forest County
+- Pennsylvania State, Court of Common Pleas, Franklin County
+- Pennsylvania State, Court of Common Pleas, Fulton County
+- Pennsylvania State, Court of Common Pleas, Greene County
+- Pennsylvania State, Court of Common Pleas, Huntingdon County
+- Pennsylvania State, Court of Common Pleas, Indiana County
+- Pennsylvania State, Court of Common Pleas, Jefferson County
+- Pennsylvania State, Court of Common Pleas, Juniata County
+- Pennsylvania State, Court of Common Pleas, Lackawanna County
+- Pennsylvania State, Court of Common Pleas, Lancaster County
+- Pennsylvania State, Court of Common Pleas, Lawrence County
+- Pennsylvania State, Court of Common Pleas, Lebanon County
+- Pennsylvania State, Court of Common Pleas, Lehigh County
+- Pennsylvania State, Court of Common Pleas, Luzerne County
+- Pennsylvania State, Court of Common Pleas, Lycoming County
+- Pennsylvania State, Court of Common Pleas, McKean County
+- Pennsylvania State, Court of Common Pleas, Mercer County
+- Pennsylvania State, Court of Common Pleas, Mifflin County
+- Pennsylvania State, Court of Common Pleas, Monroe County
+- Pennsylvania State, Court of Common Pleas, Montgomery County
+- Pennsylvania State, Court of Common Pleas, Montour County
+- Pennsylvania State, Court of Common Pleas, Northampton County
+- Pennsylvania State, Court of Common Pleas, Northumberland County
+- Pennsylvania State, Court of Common Pleas, Perry County
+- Pennsylvania State, Court of Common Pleas, Philadelphia County
+- Pennsylvania State, Court of Common Pleas, Pike County
+- Pennsylvania State, Court of Common Pleas, Potter County
+- Pennsylvania State, Court of Common Pleas, Schuylkill County
+- Pennsylvania State, Court of Common Pleas, Snyder County
+- Pennsylvania State, Court of Common Pleas, Somerset County
+- Pennsylvania State, Court of Common Pleas, Sullivan County
+- Pennsylvania State, Court of Common Pleas, Susquehanna County
+- Pennsylvania State, Court of Common Pleas, Tioga County
+- Pennsylvania State, Court of Common Pleas, Union County
+- Pennsylvania State, Court of Common Pleas, Venango County
+- Pennsylvania State, Court of Common Pleas, Warren County
+- Pennsylvania State, Court of Common Pleas, Washington County
+- Pennsylvania State, Court of Common Pleas, Wayne County
+- Pennsylvania State, Court of Common Pleas, Westmoreland County
+- Pennsylvania State, Court of Common Pleas, Wyoming County
+- Pennsylvania State, Court of Common Pleas, York County
+- Pennsylvania State, Magisterial District Court, Adams County
+- Pennsylvania State, Magisterial District Court, Allegheny County
+- Pennsylvania State, Magisterial District Court, Armstrong County
+- Pennsylvania State, Magisterial District Court, Beaver County
+- Pennsylvania State, Magisterial District Court, Bedford County
+- Pennsylvania State, Magisterial District Court, Berks County
+- Pennsylvania State, Magisterial District Court, Blair County
+- Pennsylvania State, Magisterial District Court, Bradford County
+- Pennsylvania State, Magisterial District Court, Bucks County
+- Pennsylvania State, Magisterial District Court, Butler County
+- Pennsylvania State, Magisterial District Court, Cambria County
+- Pennsylvania State, Magisterial District Court, Cameron County
+- Pennsylvania State, Magisterial District Court, Carbon County
+- Pennsylvania State, Magisterial District Court, Centre County
+- Pennsylvania State, Magisterial District Court, Chester County
+- Pennsylvania State, Magisterial District Court, Clarion County
+- Pennsylvania State, Magisterial District Court, Clearfield County
+- Pennsylvania State, Magisterial District Court, Clinton County
+- Pennsylvania State, Magisterial District Court, Columbia County
+- Pennsylvania State, Magisterial District Court, Crawford County
+- Pennsylvania State, Magisterial District Court, Cumberland County
+- Pennsylvania State, Magisterial District Court, Dauphin County
+- Pennsylvania State, Magisterial District Court, Delaware County
+- Pennsylvania State, Magisterial District Court, Elk County
+- Pennsylvania State, Magisterial District Court, Erie County
+- Pennsylvania State, Magisterial District Court, Fayette County
+- Pennsylvania State, Magisterial District Court, Forest County
+- Pennsylvania State, Magisterial District Court, Franklin County
+- Pennsylvania State, Magisterial District Court, Fulton County
+- Pennsylvania State, Magisterial District Court, Greene County
+- Pennsylvania State, Magisterial District Court, Huntingdon County
+- Pennsylvania State, Magisterial District Court, Indiana County
+- Pennsylvania State, Magisterial District Court, Jefferson County
+- Pennsylvania State, Magisterial District Court, Juniata County
+- Pennsylvania State, Magisterial District Court, Lackawanna County
+- Pennsylvania State, Magisterial District Court, Lancaster County
+- Pennsylvania State, Magisterial District Court, Lawrence County
+- Pennsylvania State, Magisterial District Court, Lebanon County
+- Pennsylvania State, Magisterial District Court, Lehigh County
+- Pennsylvania State, Magisterial District Court, Luzerne County
+- Pennsylvania State, Magisterial District Court, Lycoming County
+- Pennsylvania State, Magisterial District Court, McKean County
+- Pennsylvania State, Magisterial District Court, Mercer County
+- Pennsylvania State, Magisterial District Court, Mifflin County
+- Pennsylvania State, Magisterial District Court, Monroe County
+- Pennsylvania State, Magisterial District Court, Montgomery County
+- Pennsylvania State, Magisterial District Court, Montour County
+- Pennsylvania State, Magisterial District Court, Northampton County
+- Pennsylvania State, Magisterial District Court, Northumberland County
+- Pennsylvania State, Magisterial District Court, Perry County
+- Pennsylvania State, Magisterial District Court, Philadelphia County
+- Pennsylvania State, Magisterial District Court, Pike County
+- Pennsylvania State, Magisterial District Court, Potter County
+- Pennsylvania State, Magisterial District Court, Schuylkill County
+- Pennsylvania State, Magisterial District Court, Snyder County
+- Pennsylvania State, Magisterial District Court, Somerset County
+- Pennsylvania State, Magisterial District Court, Sullivan County
+- Pennsylvania State, Magisterial District Court, Susquehanna County
+- Pennsylvania State, Magisterial District Court, Tioga County
+- Pennsylvania State, Magisterial District Court, Union County
+- Pennsylvania State, Magisterial District Court, Venango County
+- Pennsylvania State, Magisterial District Court, Warren County
+- Pennsylvania State, Magisterial District Court, Washington County
+- Pennsylvania State, Magisterial District Court, Wayne County
+- Pennsylvania State, Magisterial District Court, Westmoreland County
+- Pennsylvania State, Magisterial District Court, Wyoming County
+- Pennsylvania State, Magisterial District Court, York County
+- Pennsylvania State, Municipal Court, Philadelphia County
+- Texas State, Angelina County
+- Texas State, Bexar County
+- Texas State, Brazoria County
+- Texas State, Cameron County
+- Texas State, Collin County
+- Texas State, Comal County
+- Texas State, Dallas County
+- Texas State, Denton County
+- Texas State, El Paso County
+- Texas State, Fannin County
+- Texas State, Fort Bend County
+- Texas State, Galveston County
+- Texas State, Gillespie County
+- Texas State, Grayson County
+- Texas State, Gregg County
+- Texas State, Guadalupe County
+- Texas State, Hale County
+- Texas State, Harris County
+- Texas State, Hays County
+- Texas State, Henderson County
+- Texas State, Hood County
+- Texas State, Howard County
+- Texas State, Johnson County
+- Texas State, Kaufman County
+- Texas State, Lamar County
+- Texas State, Matagorda County
+- Texas State, Medina County
+- Texas State, Montgomery County
+- Texas State, Nueces County
+- Texas State, Panola County
+- Texas State, Parker County
+- Texas State, Randall County
+- Texas State, Smith County
+- Texas State, Tarrant County
+- Texas State, Taylor County
+- Texas State, Tom Green County
+- Texas State, Travis County
+- Texas State, Victoria County
+- Texas State, Walker County
+- Texas State, Waller County
+- Texas State, Williamson County
+- Texas State, Wood County
+- Washington State, Adams County, Superior Court
+- Washington State, Asotin County, Superior Court
+- Washington State, Benton County, Superior Court
+- Washington State, Chelan County, Superior Court
+- Washington State, Clallam County, Superior Court
+- Washington State, Clark County, Superior Court
+- Washington State, Columbia County, Superior Court
+- Washington State, Cowlitz County, Superior Court
+- Washington State, Douglas County, Superior Court
+- Washington State, Ferry County, Superior Court
+- Washington State, Franklin County, Superior Court
+- Washington State, Garfield County, Superior Court
+- Washington State, Grant County, Superior Court
+- Washington State, Grays Harbor County, Superior Court
+- Washington State, Island County, Superior Court
+- Washington State, Jefferson County, Superior Court
+- Washington State, King County, District Court
+- Washington State, King County, Superior Court
+- Washington State, Kitsap County, Superior Court
+- Washington State, Kittitas County, Superior Court
+- Washington State, Klickitat County, Superior Court
+- Washington State, Lewis County, Superior Court
+- Washington State, Lincoln County, Superior Court
+- Washington State, Mason County, Superior Court
+- Washington State, Okanogan County, Superior Court
+- Washington State, Pacific County, Superior Court
+- Washington State, Pend Oreille County, Superior Court
+- Washington State, San Juan County, Superior Court
+- Washington State, Skagit County, Superior Court
+- Washington State, Skamania County, Superior Court
+- Washington State, Snohomish County, Superior Court
+- Washington State, Spokane County, Superior Court
+- Washington State, Stevens County, Superior Court
+- Washington State, Thurston County, Superior Court
+- Washington State, Wahkiakum County, Superior Court
+- Washington State, Walla Walla County, Superior Court
+- Washington State, Whatcom County, Superior Court
+- Washington State, Whitman County, Superior Court
+- Washington State, Yakima County, Superior Court
+- New York State, Nassau County District Court, 1st District
+- New York State, Suffolk County District Court, 1st District
+- New York State, Nassau County District Court, 2nd District
+- New York State, Suffolk County District Court, 2nd District
+- New York State, Nassau County District Court, 3rd District
+- New York State, Suffolk County District Court, 3rd District
+- New York State, Nassau County District Court, 4th District
+- New York State, Suffolk County District Court, 4th District
+- New York State, Suffolk County District Court, 5th District
+- New York State, Suffolk County District Court, 6th District
