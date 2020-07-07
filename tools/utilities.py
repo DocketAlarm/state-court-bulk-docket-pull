@@ -1,4 +1,3 @@
-from config import auth
 from config import config
 import requests
 
