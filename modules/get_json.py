@@ -1,5 +1,4 @@
 from config import config
-from config import auth
 from modules import login
 from modules import file_browser
 import main
