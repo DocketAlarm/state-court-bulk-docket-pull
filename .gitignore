@@ -16,8 +16,6 @@
 /csv/input.csv
 /config/auth.py
 
-# Launcher script with absolute paths
-run.bat
 
 # Output files
 /pdf-output/*
