@@ -1,6 +1,9 @@
 from modules import get_json
 from modules import get_pdfs
 from modules import login
+from modules import menus
+from modules import file_browser
+from modules import global_variables
 from tools import utilities
 import os
 from colorama import init, Fore, Back, Style
@@ -30,6 +33,10 @@ def clear():
     os.system('cls' if os.name == 'nt' else 'clear')
 
 def welcome():
+    """
+    The code that executes at launch. It guides the user through menus and starts other functions from the other folders
+    based on the users choices.
+    """
     clear()
     print(msg)
     print(Style.RESET_ALL)
@@ -56,15 +63,18 @@ This program takes in a csv file full of docket numbers and will automatically
 populate 2 folders with the raw JSON data and all of the PDF documents associated
 with that docket.
 
-Make sure to edit config.py and auth.py before running this program.
-For more information, please visit the Github page for this project.
-
-Press ENTER for options.
-
+You will now select the path where your input csv is located.
+Press ENTER to open the file browser.
     """
     print(instructions)
     input()
     clear()
+
+    # Opens a graphical file browser and returns the path to the csv file that the user selected.
+    csvChoice = file_browser.browseCSVFiles()
+
+    # Assigns the choice to a global variable, so other modules can find the path that the user specified.
+    global_variables.CSV_INPUT_PATH = csvChoice
 
     options = """
 Type in one of the following numbers and press ENTER to specify your choice:
@@ -74,28 +84,41 @@ Type in one of the following numbers and press ENTER to specify your choice:
 [2] Get JSON files only.
 
 [3] Get PDF files only.
-    ( Only select 3 if your 'json-output' folder already contains JSON )
-    ( files for the cases you want PDFs for.                           )
+    ( Only select 3 if you already have a directory full of JSON files. )
+    ( The JSON files are needed to extract the download links from.     )
 
 Enter your response below.
     """
     print(options)
 
     def handle_input():
+        """
+        Prompts the user for a choice and calls the function from the 'modules' folder that corresponds
+        with that choice.
+        """
         userChoice = input()
+
+        # Choice 1 is downloading all json and pdf files.
         if userChoice == "1":
             clear()
+            menus.select_paths_menu()
             print(msg)
             get_json_and_pdfs()
+        # Choice 2 is donwloading only JSON files.
         elif userChoice == "2":
             clear()
+            menus.select_paths_menu(pdfOption=False)
             print(msg)
             get_json.loop_dataframe()
+        # Choice 3 is downloading only PDF files.
         elif userChoice == "3":
             clear()
+            menus.select_paths_menu()
             print(msg)
             link_list = get_pdfs.get_urls("json-output")
             get_pdfs.multiprocess_download_pdfs(link_list)
+        # If the user enters anything other than a valid choice, then it tells them their choice is invalid and
+        # restarts this function, prompting them to make a choice again.
         else:
             print("Please Enter Valid input (1, 2 or 3)")
             return handle_input()
@@ -108,13 +131,24 @@ Enter your response below.
 
 
 def get_json_and_pdfs():
+    """
+    This function calls the function to download JSON first, immediately followed by the function to download
+    PDFs. This is used when the user chooses the menu choice to download both.
+    """
 
+    # The function that downloads the JSON files
     get_json.loop_dataframe()
 
+    # The function that extracts the proper arguments to pass to the function for downloading PDFs using multiprocessing.
+    # That function requires a list of tuples, each tuple being a seperate set of arguments to pass.
     link_list = get_pdfs.get_urls("json-output")
+
+    # This function uses multiprocessing on the function that downloads PDFs, allowing us to download multiple PDFs at once,
+    # speeding up the process.
     get_pdfs.multiprocess_download_pdfs(link_list)
 
     print("done")
 
+# This code executes if this function is run directly, rather than being imported from elsewhere.
 if __name__ == '__main__':
     welcome()
