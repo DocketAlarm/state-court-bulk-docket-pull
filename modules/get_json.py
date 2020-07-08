@@ -1,6 +1,7 @@
 from config import config
 from modules import login
 from modules import file_browser
+from modules import global_variables
 import main
 
 
@@ -39,23 +40,22 @@ from retrying import retry
 
 
 
-# These are your global variables. They are important to change if you want
-# to repurpose this code to make API calls based on a different spreadsheet,
-# or if you want to search within a different court.
+# Reinforces that the variables defined in the global_variables module, and then edited from within other modules,
+# continue to have the value that the user changed it to.
+# It may look redundant, but without this line, the script only uses the default variable, without reflecting changes.
 
-# court = "Florida State, Duval County, Fourth Circuit Court"
-# spreadsheet = "death-penalty-project.csv"
-# isCached = True
+global_variables.JSON_INPUT_OUTPUT_PATH = global_variables.JSON_INPUT_OUTPUT_PATH
 
-def write_to_json_file(folder, fileName, data):
+def write_to_json_file(fileName, data):
     """ takes in the name of a folder in the current directory, the name of
         the file you want to create, and the json object you want to write to
         the file.
     """ 
+
     try:
         # Created the path where our .json file will be saved to
         # filePathNameWExt = os.path.join(config.cwd, folder, fileName + '.json')
-        filePathNameWExt = os.path.join(folder, fileName + '.json')
+        filePathNameWExt = os.path.join(global_variables.JSON_INPUT_OUTPUT_PATH, fileName + '.json')
 
 
         # When 'opening' a file that doesn't yet exist, we create that file.
@@ -66,13 +66,14 @@ def write_to_json_file(folder, fileName, data):
             json.dump(data,fp)
     
     except Exception as e:
-        print("\nError writing json file. Make sure 'json-output' folder is present in the root directory of the program.\nReference the documentation for more information\n")
+        print("\nError writing json file.\nReference the documentation for more information\n")
         input()
         print(e)
 
 def authenticate():
-    """Returns the authentication token to make API calls.
-       Make sure that auth.py is filled out!
+    """
+    Returns the authentication token to make API calls.
+    Make sure that auth.py is filled out!
     """
     user = login.Credentials()
 
@@ -163,19 +164,17 @@ def loop_dataframe():
     # an object representing tabular data that can comfortably be manipulated and
     # accessed in python.
 
-    print("Select the file path of your input CSV file.\nUpon pressing ENTER, a file browser window will apear.")
-    input()
-    
     # Opens a file browser where the user can use a friendly GUI to find their CSV input file.
-    spreadsheet_path = file_browser.browseCSVFiles()
-
+    spreadsheet_path = global_variables.CSV_INPUT_PATH
     # Displays the choice to the user and prompts them to confirm if their selected file is correct.
     # If it is not, it will bring them back to the file browser to browse for another file.
-    main.clear()
-    print(f"We will load the input csv from: {spreadsheet_path}\nIs this okay? (Y/n)")
-    csvInputAnswer = input()
-    if csvInputAnswer.upper().strip() != "Y":
-        loop_dataframe()
+
+    # main.clear()
+    # print(f"We will load the input csv from: {spreadsheet_path}\nIs this okay? (Y/n)")
+    # csvInputAnswer = input()
+    # if csvInputAnswer.upper().strip() != "Y":
+    #     loop_dataframe()
+
     main.clear()
     print(main.msg)
  
@@ -214,7 +213,7 @@ def loop_dataframe():
         if config.formatCaseNos == True:
             caseNo = format_case_number(caseNo)
         elif config.formatCaseNos == False:
-            caseNo = row[1]
+            caseNo = row[1].strip()
         else:
             # If for some reason the 'formatCaseNos' variable is not set, we default on the
             # case numbers provided in the spreadsheet.
@@ -229,7 +228,7 @@ def loop_dataframe():
         # We save the json files and set their individual filenames to be the last name of the
         # party followed by the docket number
 
-        write_to_json_file('json-output', f"{caseName} {caseNo}", docket)
+        write_to_json_file(f"{caseName} {caseNo}", docket)
 
         # With each loop, the progress bar moves forward.
         bar.next()
@@ -237,7 +236,7 @@ def loop_dataframe():
     # Forces the progress bar to 100%
     bar.finish()
     try:
-        os.startfile('json-output')
+        os.startfile(global_variables.JSON_INPUT_OUTPUT_PATH)
     except Exception:
         pass  
 

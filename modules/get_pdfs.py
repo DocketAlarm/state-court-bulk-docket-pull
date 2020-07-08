@@ -6,6 +6,14 @@ from config import config
 import re
 from multiprocessing import Pool, cpu_count
 import datetime
+from modules import file_browser
+from modules import global_variables
+
+# Reinforces that the variables defined in the global_variables module, and then edited from within other modules,
+# continue to have the value that the user changed it to.
+# It may look redundant, but without this line, the script only uses the default variable, without reflecting changes.
+global_variables.PDF_OUTPUT_PATH = global_variables.PDF_OUTPUT_PATH
+
 
 def cleanhtml(raw_html):
     """
@@ -48,17 +56,12 @@ def get_urls(input_directory):
     pdf_list = []
 
     # The absolute path of the 'result' folder
-    input_directory = 'json-output'
+    input_directory = global_variables.JSON_INPUT_OUTPUT_PATH
 
     if os.path.isdir(input_directory) == False:
         print("[ERROR] Could not write PDF files.\nMake sure 'json-output' folder exists in the root directroy of the program.\nCheck documentation for more information.\n")
         input()
 
-    # The amount of files in the 'result' folder. Used for the loading bar.
-    # max = len(os.listdir(input_directory))
-
-    # Creates a loading bar
-    # bar = IncrementalBar("Downloading PDFs", max=max)
 
     # Loops through every file in the 'result' directory.
     for file in os.listdir(input_directory):
@@ -139,7 +142,7 @@ def get_urls(input_directory):
     # bar.finish()
     return pdf_list
 
-def download_from_link_list(link, fileName, folderName):
+def download_from_link_list(link, fileName, folderName, outputPath):
     """
     Downloads PDF documents from the web and saves them in a specified folder.
     Takes in 3 string arguments:
@@ -149,8 +152,8 @@ def download_from_link_list(link, fileName, folderName):
     Notice how the arguments are the same as what the get_urls() function returns.
     This function Isn't made to be used on its own, but can be.
     """
-    output_directory = 'pdf-output'
-    outputDirectoryPath = os.path.join(output_directory, folderName)
+    
+    outputDirectoryPath = os.path.join(outputPath, folderName)
     outputFilePath = os.path.join(outputDirectoryPath, f"{fileName}.pdf")
 
     if not os.path.exists(outputDirectoryPath):
@@ -181,6 +184,10 @@ def multiprocess_download_pdfs(link_list):
 
     print("Downloading PDFs...")
 
+    print(global_variables.PDF_OUTPUT_PATH)
+
+    link_list = add_path_to_list_of_tuples(link_list, global_variables.PDF_OUTPUT_PATH)
+
     # Initiates the pool, assigns different calls to a function to a specified amount of CPU cores.
     # In this case, we pass the cpu_count() which represents the amount of CPU cores in the current system.
     # This will ensure that all the systems cores get utilized, and the more cores the system has, the faster the files will download.
@@ -203,6 +210,25 @@ def multiprocess_download_pdfs(link_list):
     # When the job is finished. We terminate the pool and free-up our cpu cores.
     pool.terminate()
 
+def add_path_to_list_of_tuples(list_of_tuples, path):
+    """
+    The tuples that are returned from get_urls are the first 3 arguments that get passed to download_from_link_list
+    with the imap multiprocessing function in multiprocess_download_pdfs.
+    This function takes in that list of tuples and returns the same list with the specified file path added as the last
+    Item on each tuple.
+    This is important because the user needs to specify an output path in multiprocess_download_pdfs and it must be passed as
+    an argument in every call to download_from_link_list.
+    """
+
+    new_list = []
+
+    for item in list_of_tuples:
+        to_list = list(item)
+        to_list.append(path)
+        back_to_tuple = tuple(to_list)
+        new_list.append(back_to_tuple)
+
+    return new_list
 
 
 

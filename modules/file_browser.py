@@ -36,3 +36,18 @@ def browseCSVFiles():
 
 
     return root.filename
+
+def browseDirectories(initialdir):
+    """
+    Opens a file browser in the 'pdf-output' directory that looks for directories.
+    Takes 1 argument: the relative path to the directory you want the browser to start in.
+    """
+
+    # Gets rid of the blank tkinter root window that will show up alongside the script if you don't include this code.
+    root = tkinter.Tk()
+    root.withdraw()
+
+    # Opens the file browser and returns the path to the directory the user selected as a string.
+    root.directory = filedialog.askdirectory(initialdir = initialdir, title ="Choose PDF Output Directory")
+    return root.directory
+
