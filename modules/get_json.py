@@ -29,17 +29,6 @@ from progress.bar import IncrementalBar
 # throw errors.
 from retrying import retry
 
-
-# This is a local module, found in the auth.py file in the same
-# directory as this one. If you are accessing this file from the
-# GitHub repository, then create an auth.py file in the same directory
-# as this file. You will specify 3 variables for logging in:
-# username, password, and client_matter.
-# The username and password are the same username and password for
-# your Docket Alarm account. client_matter is your use case.
-
-
-
 # Reinforces that the variables defined in the global_variables module, and then edited from within other modules,
 # continue to have the value that the user changed it to.
 # It may look redundant, but without this line, the script only uses the default variable, without reflecting changes.
@@ -114,22 +103,34 @@ def get_docket(docket, caseCourt):
     """ 
     Takes in a docket number as an argument and returns all the JSON data available from Docket Alarm.
     """
+
+    # We create a user object from the /sav/credentials.pickle file so we can access the username and password from its attributes.
     user = login.Credentials()
 
+    # The endpoint we will be connecting to. Calls to this endpoint return the json data for the docket we want.
     getdocket_url = "https://www.docketalarm.com/api/v1/getdocket/"
 
+    # The parameters we pass to the endpoint. This is how the API knows how to find what we are looking for.
     data = {
+        # The token generated after logging in.
         'login_token':authenticate(),
+        # The reason for use
         'client_matter': user.client_matter,
+        # The court we want to search.
         'court': caseCourt,
+        # The docket number we want data for
         'docket':docket,
+        # A boolean representing whether or not we want the cached version of the data.
         'cached': config.isCached,
+        # Cleans up names
         'normalize':True,
     }
 
+    # Makes the api call. We specify the endpoint and the parameters as arguments. The results of the API call are returned and
+    # stored to a variable. 
     result = requests.get(getdocket_url, data, timeout=30)
     
-
+    # We use .json() to convert the json results to a python dictionary we can more easily work with.
     result_json = result.json()
     try:
         result_json = result.json()
@@ -137,7 +138,7 @@ def get_docket(docket, caseCourt):
         result_json = None
     return result_json
 
-
+# This function is no longer used and only suits a very specific use case.
 def format_case_number(unformatted_case_number):
     """ 
     Trims off excess data from the case numbers
@@ -218,7 +219,9 @@ def loop_dataframe():
     # Forces the progress bar to 100%
     bar.finish()
     try:
+        # When the json files are finished downloading, we open the output folder in the file explorer.
         os.startfile(global_variables.JSON_INPUT_OUTPUT_PATH)
     except Exception:
+        # In case the users OS doesn't support this feature, we except any errors.
         pass  
 
