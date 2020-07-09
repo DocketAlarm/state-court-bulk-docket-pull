@@ -20,5 +20,12 @@ class TestGetPDFs(unittest.TestCase):
         self.assertEqual(result3, "Minute_Entry_for_proceedings_held_before_Judge_Katherine_Polk_Failla_")
         self.assertEqual(result4, "MOTION_TO_DECLARE_SECTION_9211417_FLA_STAT_UNCONSTITUTIONAL_AND_REQUEST_FOR_PROFFER_OF_VICTIM_IMPACT_TESTIMONY_AND_PRETRIAL_RULING_ON_WHETHER_THE_DANGER_OF_UNFAIR_PREJUDICE_OF_THAT_EVIDENCE_OUTWEIGHS_ITS_PROBATIVE_VALUE_ANDOR_OTHERWISE_DENI")
 
+    def test_download_from_link_list(self):
+        get_pdfs.download_from_link_list("https://www.nasa.gov/pdf/390539main_Athlete%20Fact%20Sheet.pdf","test_pdf","pdf_test", "test")
+        bool_ = os.path.isfile(os.path.join('test',"pdf_test",'test_pdf.pdf'))
+        self.assertTrue(bool_)
+        os.remove(os.path.join("test","pdf_test", 'test_pdf.pdf'))
+        os.rmdir(os.path.join("test","pdf_test"))
+
 if __name__ == '__main__':
     unittest.main()
