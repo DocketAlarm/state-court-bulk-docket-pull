@@ -1,6 +1,8 @@
 # Built-in Modules
 import pickle
 import os
+# Third-party Modules
+import stdiomask
 # Internal Modules
 import main
 import requests
@@ -59,7 +61,7 @@ def login_interface():
     input_username = input()
     main.clear()
     print("\nPlease enter your Docket Alarm password and press ENTER\n(This will be stored securely on your local machine)\n")
-    input_password = input()
+    input_password = stdiomask.getpass(mask="*", prompt="")
     main.clear()
     print("\nIf applicable, please enter your client matter.\nIf unsure, leave blank and press ENTER\n")
     input_client_matter = input()
