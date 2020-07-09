@@ -109,12 +109,10 @@ def authenticate():
     # the key.
     return login_token
 
-
-
-
 @retry
 def get_docket(docket, caseCourt):
-    """ Takes in a docket number as an argument and returns all the JSON data available from Docket Alarm.
+    """ 
+    Takes in a docket number as an argument and returns all the JSON data available from Docket Alarm.
     """
     user = login.Credentials()
 
@@ -141,9 +139,10 @@ def get_docket(docket, caseCourt):
 
 
 def format_case_number(unformatted_case_number):
-    """ Trims off excess data from the case numbers
-        provided, and returns the same number in a
-        form that Docket Alarm can search for.
+    """ 
+    Trims off excess data from the case numbers
+    provided, and returns the same number in a
+    form that Docket Alarm can search for.
     """
 
     # Takes in a regular expression as the first argument and the string you
@@ -158,28 +157,17 @@ def loop_dataframe():
     """ loops through the spreadsheet listed in the global variable toward the top of
         this script. Returns docket info from each."""
 
-
-
-    # We turn the csv in our current directory into a DataFrame object. This is
-    # an object representing tabular data that can comfortably be manipulated and
-    # accessed in python.
-
     # Opens a file browser where the user can use a friendly GUI to find their CSV input file.
     spreadsheet_path = global_variables.CSV_INPUT_PATH
-    # Displays the choice to the user and prompts them to confirm if their selected file is correct.
-    # If it is not, it will bring them back to the file browser to browse for another file.
-
-    # main.clear()
-    # print(f"We will load the input csv from: {spreadsheet_path}\nIs this okay? (Y/n)")
-    # csvInputAnswer = input()
-    # if csvInputAnswer.upper().strip() != "Y":
-    #     loop_dataframe()
 
     main.clear()
     print(main.msg)
  
     # spreadsheet_path = os.path.join('csv', config.spreadsheet)
 
+    # We turn the csv in our current directory into a DataFrame object. This is
+    # an object representing tabular data that can comfortably be manipulated and
+    # accessed in python.
     try:
         df = pd.read_csv(spreadsheet_path)
         len_df = len(df)
@@ -190,8 +178,6 @@ def loop_dataframe():
         print("[ERROR] Input CSV file not found. Check to make sure the file is present and the filename matches the name specified in config/config.py\nThe default filename is 'input.csv' and it should be placed in the 'csv' folder.\nAlso, ensure all dependencies are installed.\nDependencies are listed in docs/requirements.txt\nReference documentation for more information.")
         input()
 
-
-
     # Here we display the loading bar on the console.
     bar = IncrementalBar('Downloading JSON Data', max=len_df)
 
@@ -200,12 +186,10 @@ def loop_dataframe():
 
         # During each run through the loop, we grab the values from each column and
         # save them to variables.
-
         caseName = row[0]
         caseNo = row[1]
         caseCourt = row[2]
         
-
         # Here we set up the logic to specify if we want to format the case numbers or not.
         # Config.py has a 'formatCaseNos' variable set to a boolean. If it's True, we
         # run the case numbers through a regular expression. If False, it runs the script
@@ -218,8 +202,6 @@ def loop_dataframe():
             # If for some reason the 'formatCaseNos' variable is not set, we default on the
             # case numbers provided in the spreadsheet.
             caseNo = caseNo
-        
-
 
         #We run get_docket() on each docket number in the loop, which returns the dictionary
         # of that individual docket's json data. We save it to a variable.

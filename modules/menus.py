@@ -24,10 +24,9 @@ def select_paths_menu(pdfOption=True):
         print("Select the path of your input csv file.")
         print("Press ENTER to open the file browser.")
         input()
-
+        
         csvChoice = file_browser.browseCSVFiles()
 
-        # global global_variables.CSV_INPUT_PATH
         global_variables.CSV_INPUT_PATH = csvChoice
 
         main.clear()
@@ -38,9 +37,12 @@ def select_paths_menu(pdfOption=True):
         print("Select the path where you would like to store your JSON files.")
         print("Press ENTER to open the file browser.")
         input()
+
+        # Stores the users choice in a variable
         jsonChoice = file_browser.browseDirectories('json-output')
 
-        # global global_variables.JSON_INPUT_OUTPUT_PATH
+        # Stores the choice to a global variable so this choice can be used throughout this script,
+        # not only in the context of this file.
         global_variables.JSON_INPUT_OUTPUT_PATH = jsonChoice
 
         main.clear()
@@ -53,7 +55,7 @@ def select_paths_menu(pdfOption=True):
         input()
         pdfChoice = file_browser.browseDirectories('pdf-output')
 
-        # global global_variables.PDF_OUTPUT_PATH
+
         global_variables.PDF_OUTPUT_PATH = pdfChoice
 
         main.clear()
