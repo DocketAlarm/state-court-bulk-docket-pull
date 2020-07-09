@@ -27,5 +27,11 @@ class TestGetPDFs(unittest.TestCase):
         os.remove(os.path.join("test","pdf_test", 'test_pdf.pdf'))
         os.rmdir(os.path.join("test","pdf_test"))
 
+    def test_add_path_to_list_of_tuples(self):
+        testInput = [("eggs", "milk"), ("onions", "flour"), ("toothpaste", "orange juice")]
+        expectedResult = [("eggs", "milk", "sand"), ("onions", "flour","sand"), ("toothpaste", "orange juice", "sand")]
+        actualResult = get_pdfs.add_path_to_list_of_tuples(testInput, "sand")
+        self.assertEqual(expectedResult,actualResult)
+
 if __name__ == '__main__':
     unittest.main()
