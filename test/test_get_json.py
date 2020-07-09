@@ -1,16 +1,21 @@
+# Built-in Modules
 import sys
 sys.path.insert(0,".")
-from modules import get_json
 import unittest
 import os
+# Internal Modules
+from modules import global_variables, get_json
+
+
+global_variables.JSON_INPUT_OUTPUT_PATH = global_variables.JSON_INPUT_OUTPUT_PATH
 
 class TestGetJson(unittest.TestCase):
 
     def test_write_to_json_file(self):
-        get_json.write_to_json_file(os.getcwd(),"test", {'test':'yes'})
-        bool_ = os.path.isfile(os.path.join(os.getcwd(),'test.json'))
+        get_json.write_to_json_file("test", {'test':'yes'})
+        bool_ = os.path.isfile(os.path.join(global_variables.JSON_INPUT_OUTPUT_PATH,'test.json'))
         self.assertTrue(bool_)
-        os.remove(os.path.join(os.getcwd(), 'test.json'))
+        os.remove(os.path.join(global_variables.JSON_INPUT_OUTPUT_PATH, 'test.json'))
 
     def test_authenticate(self):
         result = get_json.authenticate()

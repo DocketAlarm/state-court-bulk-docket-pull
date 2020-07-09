@@ -1,13 +1,18 @@
+# Built-in Modules
 import os
 import json
+from multiprocessing import Pool, cpu_count
+import re
+import datetime
+# Third-party Modules
 from progress.bar import IncrementalBar
 import requests
+# Internal Modules
 from config import config
-import re
-from multiprocessing import Pool, cpu_count
-import datetime
-from modules import file_browser
-from modules import global_variables
+from modules import file_browser, global_variables
+
+
+# from modules import global_variables
 
 # Reinforces that the variables defined in the global_variables module, and then edited from within other modules,
 # continue to have the value that the user changed it to.
@@ -40,6 +45,8 @@ def cleanhtml(raw_html):
     # Cuts the name short so it doesn't go over the maximum amount of characters for a NTFS filename
     cleantext = cleantext[0:240]
 
+    # Return the text free of html tags and symbols that can't be used in filenames.
+    # It will also be cut to a length that doesn't go over the maximum length for a filename. 
     return cleantext
 
 def get_urls(input_directory):
@@ -132,8 +139,12 @@ def get_urls(input_directory):
                                 # If a link to a PDF does exist, we store it in a variable.
                                 exhibitLink = exhibit['link']
                                 
+                                # We create a file name to save the exhibit pdf as
                                 exhibitName = f"Exhibit {exhibitNumber} - {docNum} - {docName}"
 
+                                # We package the name, link, and filename together in a tuple, that will be passed as an argument to our
+                                # download_from_link_list() function within the multiprocess_download_pdfs() function where we use imap to
+                                # downloading with multiprocessing functionality.
                                 exhibitLink_tuple = (exhibitLink, exhibitName, base_filename)
                                 pdf_list.append(exhibitLink_tuple)
 
@@ -153,23 +164,26 @@ def download_from_link_list(link, fileName, folderName, outputPath):
     This function Isn't made to be used on its own, but can be.
     """
     
+    # The directory where we will create the subdirectories within for each individual docket
     outputDirectoryPath = os.path.join(outputPath, folderName)
+    # The path we are saving the file to, inside the subdirectory we will create.
     outputFilePath = os.path.join(outputDirectoryPath, f"{fileName}.pdf")
 
+    # If the directory for the docket doesn't yet exist...
     if not os.path.exists(outputDirectoryPath):
 
         # Then, create it!
         os.makedirs(outputDirectoryPath)
     
-    apiRequest = requests.get(link, stream=True)
+    # We then make an http request to the pdf link and save the result in a variable.
+    request = requests.get(link, stream=True)
 
     try:
     # Once the folder is created, we can create a file inside it, open it, and...
         with open(outputFilePath, "wb") as e:
 
             # Write the contents of the PDF to the place we specify.
-            # ( Again, in this case, the 'result_filtered' folder)
-            e.write(apiRequest.content)
+            e.write(request.content)
     
     except Exception as a:
         print(a)
@@ -186,6 +200,10 @@ def multiprocess_download_pdfs(link_list):
 
     print(global_variables.PDF_OUTPUT_PATH)
 
+    # The list of tuples we get in link_list will be passed as arguments when calling download_from_link_list() with imap below to
+    # use multiprocessing. There is an issue where the function cannot find global variables when it is called from within imap.
+    # We use the add_path_to_list_of_tuples() function to append each tuple in the list with the correct file path from the global variable
+    # which is specified by the user within the menus. This ensures that the correct output path can be passed as an argument.
     link_list = add_path_to_list_of_tuples(link_list, global_variables.PDF_OUTPUT_PATH)
 
     # Initiates the pool, assigns different calls to a function to a specified amount of CPU cores.
@@ -220,14 +238,20 @@ def add_path_to_list_of_tuples(list_of_tuples, path):
     an argument in every call to download_from_link_list.
     """
 
+    # Creates the new list which we will populate in the loop below.
     new_list = []
 
+    # We loop through the old list of tuples...
     for item in list_of_tuples:
+        # Tuples are immutable, which means they cant be changes, so we convert each one to a list...
         to_list = list(item)
+        # Then we add the file path specified in the argument passed to this function to the end of each list...
         to_list.append(path)
+        # After adding to the list, we convert it back to a tuple...
         back_to_tuple = tuple(to_list)
+        # We add the tuple to the new list above...
         new_list.append(back_to_tuple)
-
+    # When the new list is populated with the updated tuples, we return it.
     return new_list
 
 

@@ -1,7 +1,9 @@
-from modules import global_variables
-from modules import file_browser
-import main
+# Built In Modules
 import os
+# Internal Modules
+from modules import global_variables, file_browser
+import main
+
 
 def select_paths_menu(pdfOption=True):
     """
@@ -25,11 +27,16 @@ def select_paths_menu(pdfOption=True):
         print("Press ENTER to open the file browser.")
         input()
         
+        # Opens the file browser and returns the path to the file that the user selected.
         csvChoice = file_browser.browseCSVFiles()
 
+        # We store this choice to a global variable to be used elsewhere in the script where
+        # we need to access this choice.
         global_variables.CSV_INPUT_PATH = csvChoice
 
         main.clear()
+
+        # Reloads path select menu, relflecting any changes.
         select_paths_menu()
 
     # Choice 2 is to edit the path to the json files.
@@ -46,6 +53,7 @@ def select_paths_menu(pdfOption=True):
         global_variables.JSON_INPUT_OUTPUT_PATH = jsonChoice
 
         main.clear()
+        # Reloads path select menu, relflecting any changes.
         select_paths_menu()
 
     # Choice 3 is to edit the path where the folders full of PDF files will be saved.
@@ -53,12 +61,16 @@ def select_paths_menu(pdfOption=True):
         print("Select the path where you would like to store your PDF files.")
         print("Press ENTER to open the file browser.")
         input()
+
+        # Opens a file explorer and returns the path to the directory the user selected as a string.
         pdfChoice = file_browser.browseDirectories('pdf-output')
 
-
+        # Saves the chosen file path to a global variable so it can be accessed elsewhere in the script when
+        # we need to access this path.
         global_variables.PDF_OUTPUT_PATH = pdfChoice
 
         main.clear()
+        # Reloads path select menu, relflecting any changes.
         select_paths_menu()
 
     # If the user doesnt make a choice and just presses ENTER, the program exits this menu and moves forward
