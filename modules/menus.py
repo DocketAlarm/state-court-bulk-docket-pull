@@ -1,7 +1,9 @@
-from modules import global_variables
-from modules import file_browser
-import main
+# Built In Modules
 import os
+# Internal Modules
+from modules import global_variables, file_browser
+import main
+
 
 def select_paths_menu(pdfOption=True):
     """

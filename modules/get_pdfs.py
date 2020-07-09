@@ -1,13 +1,18 @@
+# Built-in Modules
 import os
 import json
+from multiprocessing import Pool, cpu_count
+import re
+import datetime
+# Third-party Modules
 from progress.bar import IncrementalBar
 import requests
+# Internal Modules
 from config import config
-import re
-from multiprocessing import Pool, cpu_count
-import datetime
-from modules import file_browser
-from modules import global_variables
+from modules import file_browser, global_variables
+
+
+# from modules import global_variables
 
 # Reinforces that the variables defined in the global_variables module, and then edited from within other modules,
 # continue to have the value that the user changed it to.

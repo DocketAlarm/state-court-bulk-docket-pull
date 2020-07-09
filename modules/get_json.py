@@ -1,33 +1,17 @@
+# Built-in Modules
+import re           # For pattern matching within strings
+import json         # For working with json data
+import os           # For accessing features of the operating system
+# Third-party Modules
+from progress.bar import IncrementalBar    # For showing graphical loading bars
+from retrying import retry                 # For automatically retrying code that throws errors
+import requests                            # For making http requests
+import pandas as pd                        # For working with tabular data
+# Internal Modules
 from config import config
-from modules import login
-from modules import file_browser
-from modules import global_variables
+from modules import login, file_browser, global_variables
 import main
 
-
-# Module for working with tabular data like csv and excel files.
-import pandas as pd
-
-# Module for sending HTTP requests and accessing repsonse data.
-import requests
-
-# Module for working with regular expressions. Used for searching through
-# strings, trimming them, and extracting data from them.
-import re
-
-# Module for working with json data.
-import json
-
-# Module for working with parts of the computer system. Here we use it to
-# access the results folder where our end result JSON files will go.
-import os
-
-# Module for creating visual loading bars. These are purely cosmetic
-from progress.bar import IncrementalBar
-
-# Module for adding retry functionality to most pieces of code that may
-# throw errors.
-from retrying import retry
 
 # Reinforces that the variables defined in the global_variables module, and then edited from within other modules,
 # continue to have the value that the user changed it to.
@@ -36,9 +20,10 @@ from retrying import retry
 global_variables.JSON_INPUT_OUTPUT_PATH = global_variables.JSON_INPUT_OUTPUT_PATH
 
 def write_to_json_file(fileName, data):
-    """ takes in the name of a folder in the current directory, the name of
-        the file you want to create, and the json object you want to write to
-        the file.
+    """ 
+    takes in the name of a folder in the current directory, the name of
+    the file you want to create, and the json object you want to write to
+    the file.
     """ 
 
     try:
@@ -155,16 +140,18 @@ def format_case_number(unformatted_case_number):
     return result
 
 def loop_dataframe():
-    """ loops through the spreadsheet listed in the global variable toward the top of
-        this script. Returns docket info from each."""
+    """ 
+    loops through the spreadsheet listed in the global variable toward the top of
+    this script. Returns docket info from each.
+    """
 
     # Opens a file browser where the user can use a friendly GUI to find their CSV input file.
     spreadsheet_path = global_variables.CSV_INPUT_PATH
 
     main.clear()
+
+    # Prints the ascii art from the welcome page.
     print(main.msg)
- 
-    # spreadsheet_path = os.path.join('csv', config.spreadsheet)
 
     # We turn the csv in our current directory into a DataFrame object. This is
     # an object representing tabular data that can comfortably be manipulated and

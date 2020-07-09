@@ -1,5 +1,7 @@
+# Built-in Modules
 import pickle
 import os
+# Internal Modules
 import main
 import requests
 

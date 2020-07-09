@@ -1,9 +1,10 @@
+# Built-in Modules
 import sys
 sys.path.insert(0,".")
-from modules import get_json
 import unittest
 import os
-from modules import global_variables
+# Internal Modules
+from modules import global_variables, get_json
 
 
 global_variables.JSON_INPUT_OUTPUT_PATH = global_variables.JSON_INPUT_OUTPUT_PATH

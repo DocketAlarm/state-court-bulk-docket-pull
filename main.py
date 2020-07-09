@@ -1,12 +1,12 @@
-from modules import get_json
-from modules import get_pdfs
-from modules import login
-from modules import menus
-from modules import file_browser
-from modules import global_variables
+# Built-in Modules
 from tools import utilities
 import os
+# Third-party Modules
 from colorama import init, Fore, Back, Style
+# Internal Modules
+from modules import get_json, get_pdfs, login, menus, file_browser, global_variables
+
+# Inititalizes Colorama functionality, allowing us to write text to the terminal in different colors.
 init()
 
 
