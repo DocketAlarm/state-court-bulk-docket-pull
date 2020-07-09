@@ -11,9 +11,6 @@ import requests
 from config import config
 from modules import file_browser, global_variables
 
-
-# from modules import global_variables
-
 # Reinforces that the variables defined in the global_variables module, and then edited from within other modules,
 # continue to have the value that the user changed it to.
 # It may look redundant, but without this line, the script only uses the default variable, without reflecting changes.
