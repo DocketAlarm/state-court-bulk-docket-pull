@@ -8,6 +8,7 @@ import os
 
 spreadsheet = "input.csv"
 isCached = True
+isGUI = False
 
 # This global variable also should not be changed unless you know for sure it suits
 # your use case. In some situations, the case numbers provided may not come in a
