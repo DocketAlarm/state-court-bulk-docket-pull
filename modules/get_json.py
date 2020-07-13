@@ -11,7 +11,8 @@ import pandas as pd                        # For working with tabular data
 from config import config
 from modules import login, file_browser, global_variables
 import main
-
+import gui #DEV
+import PySimpleGUI as sg
 
 # Reinforces that the variables defined in the global_variables module, and then edited from within other modules,
 # continue to have the value that the user changed it to.
@@ -144,6 +145,7 @@ def loop_dataframe():
     loops through the spreadsheet listed in the global variable toward the top of
     this script. Returns docket info from each.
     """
+    progress = 0 #DEV
 
     # Opens a file browser where the user can use a friendly GUI to find their CSV input file.
     spreadsheet_path = global_variables.CSV_INPUT_PATH
@@ -171,6 +173,11 @@ def loop_dataframe():
 
     # We loops through each row in the pandas dataframe
     for index, row in df.iterrows():
+
+        progress += 1 #DEV
+
+        if config.isGUI == True:
+            sg.one_line_progress_meter("Downloading JSON", progress + 1, len_df, "progbar2")
 
         # During each run through the loop, we grab the values from each column and
         # save them to variables.
