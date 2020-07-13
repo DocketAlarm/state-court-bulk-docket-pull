@@ -29,11 +29,11 @@ def declare_globals(event, values):
 
 layout = [
     [sg.Txt('Input CSV')],
-    [sg.Input(os.path.abspath(os.path.join("csv", "input.csv")),size=(50,1), key="pathCSV"), sg.FileBrowse("Browse", key="browseCSV")],
+    [sg.Input(os.path.abspath(os.path.join("csv", "input.csv")),size=(50,1), key="pathCSV"), sg.FileBrowse("Browse", key="browseCSV", initial_folder="csv", file_types=(("CSV Files", "*.csv"),))],
     [sg.Txt('JSON Directory')],
-    [sg.Input(os.path.abspath("json-output"),size=(50,1), key="pathJSON"), sg.FolderBrowse("Browse", key="browseJSON")],
+    [sg.Input(os.path.abspath("json-output"),size=(50,1), key="pathJSON"), sg.FolderBrowse("Browse", key="browseJSON",initial_folder="json-output")],
     [sg.Txt('PDF Directory')],
-    [sg.Input(os.path.abspath("pdf-output"),size=(50,1), key="pathPDF"), sg.FolderBrowse("Browse", key="browsePDF")],
+    [sg.Input(os.path.abspath("pdf-output"),size=(50,1), key="pathPDF"), sg.FolderBrowse("Browse", key="browsePDF", initial_folder="pdf-output")],
     [sg.Button("Get JSON & PDFs", key="getJSON_PDF"), sg.Button("Get JSON", key="getJSON"), sg.Button("Get PDFs", key="getPDF")],
     [sg.Image("img/spinner.gif", key="spinner")]
 ]
