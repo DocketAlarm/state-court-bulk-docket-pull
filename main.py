@@ -148,17 +148,17 @@ def get_json_and_pdfs():
     # That function requires a list of tuples, each tuple being a seperate set of arguments to pass.
     link_list = get_pdfs.get_urls("json-output")
 
-    # This function uses multiprocessing on the function that downloads PDFs, allowing us to download multiple PDFs at once,
+    # This function uses threading on the function that downloads PDFs, allowing us to download multiple PDFs at once,
     # speeding up the process.
-
-    # get_pdfs.multiprocess_download_pdfs(link_list)
-    get_pdfs.thread_download_pdfs(link_list) # Development
+    get_pdfs.thread_download_pdfs(link_list)
 
     print("done")
 
 # This code executes if this function is run directly, rather than being imported from elsewhere.
 if __name__ == '__main__':
     if config.isGUI == False:
+        # If isGUI is set to False in config/config.py, then the program will run in the command line when this file is executed.
         welcome()
     if config.isGUI == True:
+        # If isGUI is set to True in config/config.py, Then the program will open with an experimental GUI. (This is not reccomended as of yet.)
         gui.gui_run()
