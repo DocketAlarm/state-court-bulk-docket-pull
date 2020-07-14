@@ -1,7 +1,7 @@
 import pandas as pd
 
-class ErrorCSV:
-    # Used for creating CSV Error logs.
+class ErrorTable:
+    # Used for creating Table (Excel) Error logs.
     # Calling object.df will produce the pandas dataframe.
     # Calling object.append_error_csv(Three string arguments) will add the values to the csv log object.
     # Calling error_csv_save(path) will save the table as a csv to the path you specify.
@@ -16,7 +16,7 @@ class ErrorCSV:
         # Null values usually get added to the class as a glitch.
         return pd.dropna(self.df)
 
-    def append_error_csv(self, error, docket, document):
+    def append_error_table(self, error, docket, document):
         """
         Takes 3 string arguments, adds them to the csv log in order
         """
@@ -37,7 +37,14 @@ class ErrorCSV:
     def error_csv_save(self,path):
         """
         Saves the csv when you are done appending it.
-        Must specify a a path as a string for the argument.
+        Must specify a path as a string for the argument.
         """
-        self.df.to_csv(path)
+        self.df.to_csv(path, index=False)
+
+    def error_excel_save(self,path):
+        """
+        Saves the xlsx file when you are done appending it.
+        Must specify a file path as a string for the argument.
+        """
+        self.df.to_excel(path,index=False)
 

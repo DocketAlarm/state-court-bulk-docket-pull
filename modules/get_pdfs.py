@@ -16,7 +16,7 @@ import PyPDF2 #DEV
 from config import config
 from modules import file_browser, global_variables
 import gui #DEV
-from modules import log_errors_to_csv #DEV
+from modules import log_errors_to_table #DEV
 
 # Reinforces that the variables defined in the global_variables module, and then edited from within other modules,
 # continue to have the value that the user changed it to.
@@ -25,7 +25,7 @@ global_variables.PDF_OUTPUT_PATH = global_variables.PDF_OUTPUT_PATH
 
 lock = threading.Lock()
 
-csvErrorLog = log_errors_to_csv.ErrorCSV()
+tableErrorLog = log_errors_to_table.ErrorTable()
 
 def cleanhtml(raw_html):
     """
@@ -207,7 +207,7 @@ def download_from_link_list(link_list):
             errorlog.write(f"{a}")
             errorlog.write(f"\n{link}\n{fileName}\n{folderName}\n{outputPath}\n------------------")
         with lock:
-            csvErrorLog.append_error_csv(f"{a}", folderName, fileName)
+            tableErrorLog.append_error_table(f"{a}", folderName, fileName)
 
 
 
@@ -293,7 +293,7 @@ def thread_download_pdfs(link_list):
     # If any PDFs will not open, then they wil be displayed in this PDF.
     # The file will be in the log folder and will be named according to the date and time when
     # the download finished.
-    csvErrorLog.error_csv_save(os.path.join("log", f"logTable - {currentDateTime}.csv"))
+    tableErrorLog.error_excel_save(os.path.join("log", f"logTable - {currentDateTime}.xlsx"))
     # We must return results to make the progress bar work.
     return results
 
