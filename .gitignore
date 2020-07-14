@@ -27,3 +27,4 @@ json-output/*.json
 log/log.txt
 log/log.csv
 csv/error.csv
+log/*.csv
