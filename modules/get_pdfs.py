@@ -99,7 +99,12 @@ def get_urls(input_directory):
         # Stores the absolute path of the current JSON file in the loop as a variable. 
         path = os.path.join(input_directory, filename)
 
-        base_filename = filename.split(".")[0]
+        # Designates the extenstion '.json' as a regex pattern that we want to remove from a string.
+        text_to_remove = re.compile(re.escape('.json'), re.IGNORECASE)
+
+        # Uses the regex above to remove '.json' from the json filenames, which we will use to name the folders that
+        # will contain the corresponding pdfs to the original json file.
+        base_filename = text_to_remove.sub("", filename)
         
         # Opens each individual JSON file
         with open(path) as jsonFile:
