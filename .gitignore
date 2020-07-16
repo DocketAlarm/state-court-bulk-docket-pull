@@ -22,6 +22,7 @@ csv/error.csv
 /pdf-output/*
 !pdf-output/.gitkeep
 json-output/*.json
+docs/updated-courts.txt
 
 # Error logs
 /logs/*.txt
