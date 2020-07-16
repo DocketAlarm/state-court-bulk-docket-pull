@@ -87,9 +87,6 @@ def get_urls(input_directory):
         # global variable directly from inside the seperate threads.
         PDF_OUTPUT_PATH = global_variables.PDF_OUTPUT_PATH
 
-        # Tells the progress bar to move forward on each iteration of the loop/
-        # bar.next()
-
         # Saves the name of each file in the folder to a variable
         filename = os.fsdecode(file)
 
@@ -274,36 +271,6 @@ def thread_download_pdfs(link_list):
     tableErrorLog.error_excel_save(os.path.join("log", f"logTable - {currentDateTime}.xlsx"))
     # We must return results to make the progress bar work.
     return results
-
-
-
-
-
-def add_path_to_list_of_tuples(list_of_tuples, path):
-    """
-    The tuples that are returned from get_urls are the first 3 arguments that get passed to download_from_link_list
-    with the imap multiprocessing function in multiprocess_download_pdfs.
-    This function takes in that list of tuples and returns the same list with the specified file path added as the last
-    Item on each tuple.
-    This is important because the user needs to specify an output path in multiprocess_download_pdfs and it must be passed as
-    an argument in every call to download_from_link_list.
-    """
-
-    # Creates the new list which we will populate in the loop below.
-    new_list = []
-
-    # We loop through the old list of tuples...
-    for item in list_of_tuples:
-        # Tuples are immutable, which means they cant be changes, so we convert each one to a list...
-        to_list = list(item)
-        # Then we add the file path specified in the argument passed to this function to the end of each list...
-        to_list.append(path)
-        # After adding to the list, we convert it back to a tuple...
-        back_to_tuple = tuple(to_list)
-        # We add the tuple to the new list above...
-        new_list.append(back_to_tuple)
-    # When the new list is populated with the updated tuples, we return it.
-    return new_list
 
 
 
