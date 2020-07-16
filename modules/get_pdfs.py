@@ -17,6 +17,7 @@ from config import config
 from modules import file_browser, global_variables
 import gui #DEV
 from modules import log_errors_to_table #DEV
+from modules import login
 
 # Reinforces that the variables defined in the global_variables module, and then edited from within other modules,
 # continue to have the value that the user changed it to.
@@ -171,6 +172,8 @@ def download_from_link_list(link_list):
     This function Isn't made to be used on its own, but can be.
     """
 
+    user = login.Credentials()
+
     link, fileName, folderName, outputPath = link_list
     
     # The directory where we will create the subdirectories within for each individual docket
@@ -186,28 +189,52 @@ def download_from_link_list(link_list):
             os.makedirs(outputDirectoryPath)
     
     # We then make an http request to the pdf link and save the result in a variable.
-    request = requests.get(link, stream=True)
+
+    #############################################################################################
+
+    params = {"login_token": user.authenticate()} ### DEV ###
+
+
+    result = requests.get(link, stream=True, params=params) ### DEV (params = params) ###
+
+    ##############################################################################################
+    
+    try:
+        result.raise_for_status() #DEV
+    
+    except Exception as a:
+        timeNow = datetime.datetime.now().strftime("%I:%M%p %B %d, %Y")
+        with lock:
+            with open(os.path.join('log', 'log.txt'), 'a') as errorlog:
+                errorlog.write(f"\n{timeNow}\n")
+                errorlog.write(f"{a}")
+                errorlog.write(f"\n{link}\n{fileName}\n{folderName}\n{outputPath}\n------------------")
+        
+            tableErrorLog.append_error_table(f"{a}", folderName, fileName)
+
 
     try:
-    # Once the folder is created, we can create a file inside it, open it, and...
+        # Once the folder is created, we can create a file inside it, open it, and...
         with open(outputFilePath, "wb") as e:
 
             # Write the contents of the PDF to the place we specify.
-            e.write(request.content)
+            e.write(result.content)
     
     except Exception as a:
         print(a)
+    
+    return
 
-    try:
-        PyPDF2.PdfFileReader(open(outputFilePath, "rb"))
-    except PyPDF2.utils.PdfReadError as a:
-        timeNow = datetime.datetime.now().strftime("%I:%M%p %B %d, %Y")
-        with open(os.path.join('log', 'log.txt'), 'a') as errorlog:
-            errorlog.write(f"\n{timeNow}\n")
-            errorlog.write(f"{a}")
-            errorlog.write(f"\n{link}\n{fileName}\n{folderName}\n{outputPath}\n------------------")
-        with lock:
-            tableErrorLog.append_error_table(f"{a}", folderName, fileName)
+    # try:
+    #     PyPDF2.PdfFileReader(open(outputFilePath, "rb"))
+    # except PyPDF2.utils.PdfReadError as a:
+    #     timeNow = datetime.datetime.now().strftime("%I:%M%p %B %d, %Y")
+    #     with open(os.path.join('log', 'log.txt'), 'a') as errorlog:
+    #         errorlog.write(f"\n{timeNow}\n")
+    #         errorlog.write(f"{a}")
+    #         errorlog.write(f"\n{link}\n{fileName}\n{folderName}\n{outputPath}\n------------------")
+    #     with lock:
+    #         tableErrorLog.append_error_table(f"{a}", folderName, fileName)
 
 
 
@@ -263,13 +290,14 @@ def thread_download_pdfs(link_list):
 
     # Starts a timer, we end the timer after we run the function with threading to see how long the bulk download
     # took in total.
-    start = time.perf_counter()
+    
 
     # We append the output path the user chose that was assigned to a global variable to the list of tuples that will
     # be passed in as arguments. We do this because functions run inside threads have a hard time accessing the changed
     # value in global_variables.py
     link_list = add_path_to_list_of_tuples(link_list, global_variables.PDF_OUTPUT_PATH)
-
+    print("Downloading PDF files...")
+    start = time.perf_counter()
     # We start up the threading executor
     with concurrent.futures.ThreadPoolExecutor() as executor:
         try:
@@ -286,7 +314,7 @@ def thread_download_pdfs(link_list):
     # We finish our timer.
     finish = time.perf_counter()
     # We display the amount of time the downloads took all together.
-    print(f"Download finished in {round(finish - start)} seconds.")
+    print(f"Finished downloading PDF files in {round(finish - start)} seconds.")
     # We save the current date and time in a variable
     currentDateTime = datetime.datetime.now().strftime("%I%M%p %B %d, %Y")
     # We save our csv log that has been tracking any errors throughout the downloads.
