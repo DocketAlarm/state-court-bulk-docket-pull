@@ -15,13 +15,20 @@
 # Filled out templates
 /csv/input.csv
 /config/auth.py
-
+csv/quick-test.csv
+csv/error.csv
 
 # Output files
 /pdf-output/*
 !pdf-output/.gitkeep
 json-output/*.json
+docs/updated-courts.txt
 
 # Error logs
 /logs/*.txt
 log/log.txt
+log/log.csv
+csv/error.csv
+log/*.csv
+log/*.xlsx
+

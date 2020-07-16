@@ -4,18 +4,29 @@ import json
 from multiprocessing import Pool, cpu_count
 import re
 import datetime
+import threading
+import time
+import concurrent.futures
 # Third-party Modules
 from progress.bar import IncrementalBar
+from tqdm import tqdm
 import requests
+import PyPDF2 #DEV
 # Internal Modules
 from config import config
 from modules import file_browser, global_variables
+import gui #DEV
+from modules import log_errors_to_table
+from modules import login
 
 # Reinforces that the variables defined in the global_variables module, and then edited from within other modules,
 # continue to have the value that the user changed it to.
 # It may look redundant, but without this line, the script only uses the default variable, without reflecting changes.
 global_variables.PDF_OUTPUT_PATH = global_variables.PDF_OUTPUT_PATH
 
+lock = threading.Lock()
+
+tableErrorLog = log_errors_to_table.ErrorTable()
 
 def cleanhtml(raw_html):
     """
@@ -70,8 +81,11 @@ def get_urls(input_directory):
     # Loops through every file in the 'result' directory.
     for file in os.listdir(input_directory):
 
-        # Tells the progress bar to move forward on each iteration of the loop/
-        # bar.next()
+        # We store our output path for PDFs from our global variable in a local variable.
+        # The output path must be included in the result because when the resulting tuples get passed to our
+        # download_from_link_list() function within the thread_download_pdfs() wrapper function, it can't access the 
+        # global variable directly from inside the seperate threads.
+        PDF_OUTPUT_PATH = global_variables.PDF_OUTPUT_PATH
 
         # Saves the name of each file in the folder to a variable
         filename = os.fsdecode(file)
@@ -82,7 +96,12 @@ def get_urls(input_directory):
         # Stores the absolute path of the current JSON file in the loop as a variable. 
         path = os.path.join(input_directory, filename)
 
-        base_filename = filename.split(".")[0]
+        # Designates the extenstion '.json' as a regex pattern that we want to remove from a string.
+        text_to_remove = re.compile(re.escape('.json'), re.IGNORECASE)
+
+        # Uses the regex above to remove '.json' from the json filenames, which we will use to name the folders that
+        # will contain the corresponding pdfs to the original json file.
+        base_filename = text_to_remove.sub("", filename)
         
         # Opens each individual JSON file
         with open(path) as jsonFile:
@@ -115,7 +134,7 @@ def get_urls(input_directory):
 
                         link_filename = f"{docNum} - {docName}"
 
-                        link_tuple = (link, link_filename, base_filename)
+                        link_tuple = (link, link_filename, base_filename, PDF_OUTPUT_PATH)
                         # Add the found link to the list, which will ultimately be returned at the end of the function.
                         pdf_list.append(link_tuple)
 
@@ -142,15 +161,15 @@ def get_urls(input_directory):
                                 # We package the name, link, and filename together in a tuple, that will be passed as an argument to our
                                 # download_from_link_list() function within the multiprocess_download_pdfs() function where we use imap to
                                 # downloading with multiprocessing functionality.
-                                exhibitLink_tuple = (exhibitLink, exhibitName, base_filename)
+                                exhibitLink_tuple = (exhibitLink, exhibitName, base_filename), PDF_OUTPUT_PATH
                                 pdf_list.append(exhibitLink_tuple)
 
             # We close the file when we are done. This also ensures that the file is saved.    
             jsonFile.close()
-    # bar.finish()
     return pdf_list
 
-def download_from_link_list(link, fileName, folderName, outputPath):
+# def download_from_link_list(link, fileName, folderName, outputPath):
+def download_from_link_list(link_list):
     """
     Downloads PDF documents from the web and saves them in a specified folder.
     Takes in 3 string arguments:
@@ -160,96 +179,98 @@ def download_from_link_list(link, fileName, folderName, outputPath):
     Notice how the arguments are the same as what the get_urls() function returns.
     This function Isn't made to be used on its own, but can be.
     """
+
+    user = login.Credentials()
+
+    link, fileName, folderName, outputPath = link_list
     
     # The directory where we will create the subdirectories within for each individual docket
     outputDirectoryPath = os.path.join(outputPath, folderName)
     # The path we are saving the file to, inside the subdirectory we will create.
     outputFilePath = os.path.join(outputDirectoryPath, f"{fileName}.pdf")
-
-    # If the directory for the docket doesn't yet exist...
-    if not os.path.exists(outputDirectoryPath):
-
-        # Then, create it!
-        os.makedirs(outputDirectoryPath)
     
-    # We then make an http request to the pdf link and save the result in a variable.
-    request = requests.get(link, stream=True)
+    # If the directory for the docket doesn't yet exist...
+    with lock: # DEVELOPMENT
+        if not os.path.exists(outputDirectoryPath):
+
+            # Then, create it!
+            os.makedirs(outputDirectoryPath)
+    
+    
+    # We ready our authentication token to pass as a paramater with our http request to get the pdf file. You must be logged in to access the files.
+    params = {"login_token": user.authenticate()}
+
+    # We then make an http request to the pdf link and save the result in a variable. We pass the authentication token as a parameter.
+    result = requests.get(link, stream=True, params=params)
 
     try:
-    # Once the folder is created, we can create a file inside it, open it, and...
+        result.raise_for_status() #DEV
+    
+    except Exception as a:
+        timeNow = datetime.datetime.now().strftime("%I:%M%p %B %d, %Y")
+        with lock:
+            with open(os.path.join('log', 'log.txt'), 'a') as errorlog:
+                errorlog.write(f"\n{timeNow}\n")
+                errorlog.write(f"{a}")
+                errorlog.write(f"\n{link}\n{fileName}\n{folderName}\n{outputPath}\n------------------")
+        
+            tableErrorLog.append_error_table(f"{a}", folderName, fileName)
+
+
+    try:
+        # Once the folder is created, we can create a file inside it, open it, and...
         with open(outputFilePath, "wb") as e:
 
             # Write the contents of the PDF to the place we specify.
-            e.write(request.content)
+            e.write(result.content)
     
     except Exception as a:
         print(a)
+    
+    return
 
 
-def multiprocess_download_pdfs(link_list):
+def thread_download_pdfs(link_list):
     """
-    Gets a list of PDF documents with appropriate output filenames and foldernames from the get_urls() function.
-    We use multiprocessing to dedicate all of our cpu cores to running the download_from_link_list() function with the
-    result of get_urls as the arguments for each pass through the function.
+    Wrapper of download_from_link_list()
+    Takes in a link_list generated by the get_urls() function.
     """
 
-    print("Downloading PDFs...")
+    # Gets the amount of links that will be downloaded. We use this later because the progress bar takes the maximum
+    # amount of downloads as a parameter
+    maximum = len(link_list)
 
-    print(global_variables.PDF_OUTPUT_PATH)
+    print("Downloading PDF files...")
 
-    # The list of tuples we get in link_list will be passed as arguments when calling download_from_link_list() with imap below to
-    # use multiprocessing. There is an issue where the function cannot find global variables when it is called from within imap.
-    # We use the add_path_to_list_of_tuples() function to append each tuple in the list with the correct file path from the global variable
-    # which is specified by the user within the menus. This ensures that the correct output path can be passed as an argument.
-    link_list = add_path_to_list_of_tuples(link_list, global_variables.PDF_OUTPUT_PATH)
-
-    # Initiates the pool, assigns different calls to a function to a specified amount of CPU cores.
-    # In this case, we pass the cpu_count() which represents the amount of CPU cores in the current system.
-    # This will ensure that all the systems cores get utilized, and the more cores the system has, the faster the files will download.
-    with Pool(cpu_count()) as pool:
-        # Starmap allows us to pass multiple arguments to the function of our choice. The arguments are fed in as a list of tuples.
-        # download_from_link_list is the function we are passing the tuples to.
-        # Files will not be downloaded in order, they are simply downloaded. When a process finishes on one core, it simply picks up
-        # another call to the function with the tuple arguments that haven't been passed through yet.
+    # Starts a timer, we end the timer after we run the function with threading to see how long the bulk download
+    # took in total.
+    start = time.perf_counter()
+    # We start up the threading executor
+    with concurrent.futures.ThreadPoolExecutor() as executor:
         try:
-            pool.starmap(download_from_link_list, link_list)
-        except Exception as a:
-
-            # If there is an error, the log file located at log\log.txt will be appended with the date and time, followed by the error that occured.
-            # The program will not stop if an error is thrown.
-            timeNow = datetime.datetime.now().strftime("%I:%M%p %B %d, %Y")
-            with open(os.path.join('log', 'log.txt'), 'a') as errorlog:
-                errorlog.write(f"\n{timeNow}\n")
-                errorlog.write(a)
-                
-    # When the job is finished. We terminate the pool and free-up our cpu cores.
-    pool.terminate()
-
-def add_path_to_list_of_tuples(list_of_tuples, path):
-    """
-    The tuples that are returned from get_urls are the first 3 arguments that get passed to download_from_link_list
-    with the imap multiprocessing function in multiprocess_download_pdfs.
-    This function takes in that list of tuples and returns the same list with the specified file path added as the last
-    Item on each tuple.
-    This is important because the user needs to specify an output path in multiprocess_download_pdfs and it must be passed as
-    an argument in every call to download_from_link_list.
-    """
-
-    # Creates the new list which we will populate in the loop below.
-    new_list = []
-
-    # We loop through the old list of tuples...
-    for item in list_of_tuples:
-        # Tuples are immutable, which means they cant be changes, so we convert each one to a list...
-        to_list = list(item)
-        # Then we add the file path specified in the argument passed to this function to the end of each list...
-        to_list.append(path)
-        # After adding to the list, we convert it back to a tuple...
-        back_to_tuple = tuple(to_list)
-        # We add the tuple to the new list above...
-        new_list.append(back_to_tuple)
-    # When the new list is populated with the updated tuples, we return it.
-    return new_list
+            # We use executor.map() to select our function and the arguments that will be passed to it in each new thread.
+            # We wrap this in list(tdqm()) to add the progress bar. See stackoverflow page below for more info.
+            # https://stackoverflow.com/questions/51601756/use-tqdm-with-concurrent-futures
+            results = list(tqdm(executor.map(download_from_link_list, link_list), total=maximum))
+        except FileExistsError as fee:
+            # If we get a FileExistsError, we let the user know that the directory they save to must be empty.
+            print("[ERROR] Directory you're saving PDFs to must be empty.")
+            input()
+            # After pressig enter, we print the error thrown out to the user.
+            print(fee)
+    # We finish our timer.
+    finish = time.perf_counter()
+    # We display the amount of time the downloads took all together.
+    print(f"Finished downloading PDF files in {round(finish - start)} seconds.")
+    # We save the current date and time in a variable
+    currentDateTime = datetime.datetime.now().strftime("%I%M%p %B %d, %Y")
+    # We save our csv log that has been tracking any errors throughout the downloads.
+    # If any PDFs will not open, then they wil be displayed in this PDF.
+    # The file will be in the log folder and will be named according to the date and time when
+    # the download finished.
+    tableErrorLog.error_excel_save(os.path.join("log", f"logTable - {currentDateTime}.xlsx"))
+    # We must return results to make the progress bar work.
+    return results
 
 
 

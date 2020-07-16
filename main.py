@@ -1,10 +1,12 @@
 # Built-in Modules
-from tools import utilities
 import os
 # Third-party Modules
 from colorama import init, Fore, Back, Style
 # Internal Modules
 from modules import get_json, get_pdfs, login, menus, file_browser, global_variables
+from config import config
+import gui
+
 
 # Inititalizes Colorama functionality, allowing us to write text to the terminal in different colors.
 init()
@@ -87,7 +89,9 @@ Type in one of the following numbers and press ENTER to specify your choice:
     ( Only select 3 if you already have a directory full of JSON files. )
     ( The JSON files are needed to extract the download links from.     )
 
-Enter your response below.
+[4] More options.
+
+Enter your response below.[1/2/3/4]
     """
     print(options)
 
@@ -109,14 +113,21 @@ Enter your response below.
             clear()
             menus.select_paths_menu(pdfOption=False)
             print(msg)
-            get_json.loop_dataframe()
+            # get_json.loop_dataframe()
+            get_json.thread_download_json()
         # Choice 3 is downloading only PDF files.
         elif userChoice == "3":
             clear()
             menus.select_paths_menu()
             print(msg)
             link_list = get_pdfs.get_urls("json-output")
-            get_pdfs.multiprocess_download_pdfs(link_list)
+
+            # get_pdfs.multiprocess_download_pdfs(link_list)
+            get_pdfs.thread_download_pdfs(link_list)
+        elif userChoice == "4":
+            clear()
+            menus.other_options_menu()
+
         # If the user enters anything other than a valid choice, then it tells them their choice is invalid and
         # restarts this function, prompting them to make a choice again.
         else:
@@ -137,18 +148,23 @@ def get_json_and_pdfs():
     """
 
     # The function that downloads the JSON files
-    get_json.loop_dataframe()
+    # get_json.loop_dataframe()
+    get_json.thread_download_json()
 
     # The function that extracts the proper arguments to pass to the function for downloading PDFs using multiprocessing.
     # That function requires a list of tuples, each tuple being a seperate set of arguments to pass.
     link_list = get_pdfs.get_urls("json-output")
 
-    # This function uses multiprocessing on the function that downloads PDFs, allowing us to download multiple PDFs at once,
+    # This function uses threading on the function that downloads PDFs, allowing us to download multiple PDFs at once,
     # speeding up the process.
-    get_pdfs.multiprocess_download_pdfs(link_list)
+    get_pdfs.thread_download_pdfs(link_list)
 
-    print("done")
 
 # This code executes if this function is run directly, rather than being imported from elsewhere.
 if __name__ == '__main__':
-    welcome()
+    if config.isGUI == False:
+        # If isGUI is set to False in config/config.py, then the program will run in the command line when this file is executed.
+        welcome()
+    if config.isGUI == True:
+        # If isGUI is set to True in config/config.py, Then the program will open with an experimental GUI. (This is not reccomended as of yet.)
+        gui.gui_run()

@@ -6,7 +6,7 @@ all of the files from the Docket Alarm API.
 
 ## Quick Start Guide
 1. Populate a CSV file with all of the dockets you would like to download.
-    1. Download the CSV template here: ```https://drive.google.com/file/d/1_8i8GEO6GlW1cjtH2afluJXCWyCRP5DG/view?usp=sharing```
+    1. Download the CSV template here: https://drive.google.com/file/d/1_8i8GEO6GlW1cjtH2afluJXCWyCRP5DG/view?usp=sharing
     1. The ```Name``` column can contain whatever text you would like to identify the docket. This will be used for storing filenames.
     1. The ```DocketNumber``` column must contain docket numbers in the same format they appear in on ```DocketAlarm.com```.
     1. The ```Court``` field must contain the court the docket is filed in. The name of the court must be spelled exactly the same as it appears in our supported court list.
