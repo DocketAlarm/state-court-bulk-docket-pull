@@ -1,4 +1,6 @@
 from config import config
+from modules import login
+import main
 import requests
 
 def authenticate():
@@ -6,14 +8,15 @@ def authenticate():
        Make sure that auth.py is filled out!
     """
 
+    user = login.Credentials()
     # This is the endpoint for logging in to Docket Alarm from the API.
     login_url = "https://www.docketalarm.com/api/v1/login/"
 
     # The data we will send to the endpoint with our post request will be
     # our Docket Alarm username and password.
     data = {
-        'username':auth.username,
-        'password':auth.password,
+        'username':user.username,
+        'password':user.password,
         }
 
     # We save the response to a variable. The response is a json object containing
@@ -91,7 +94,7 @@ def get_parameters():
 
     return result_json
 
-def get_results(party_name, docketnum):
+def get_results(party_name, docketnum, court):
     """ Takes in the name of a party and the docket number as a parameter,
         returns the Docket Alarm search results. You can make calls to the
         /getdocket endpoint with these results to get more detailed information
@@ -101,10 +104,10 @@ def get_results(party_name, docketnum):
 
     data = {
         'login_token':authenticate(),
-        'client_matter':config.client_matter,
+        'client_matter':"",
         'party_name':party_name,
         'docketnum':docketnum,
-        'court': config.court,
+        'court': court,
         'case_type':'CF',
 
     }
@@ -112,6 +115,7 @@ def get_results(party_name, docketnum):
     result = requests.post(searchdirect_url, data)
 
     result_json = result.json()
+
 
     search_results = None
 
