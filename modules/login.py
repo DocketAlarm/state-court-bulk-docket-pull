@@ -83,6 +83,9 @@ class Credentials:
         # the key.
         return login_token
 
+    def logout(self):
+        os.remove(os.path.join("sav", "credentials.pickle"))
+
 def login_interface():
     """
     Called to display menus and options for logging in
