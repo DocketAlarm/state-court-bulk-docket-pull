@@ -1,7 +1,7 @@
 # Built In Modules
 import os
 # Internal Modules
-from modules import global_variables, file_browser
+from modules import global_variables, file_browser, fetch_updated_court_list, login
 import main
 
 
@@ -76,3 +76,46 @@ def select_paths_menu(pdfOption=True):
     # If the user doesnt make a choice and just presses ENTER, the program exits this menu and moves forward
     else:
         main.clear()
+
+def other_options_menu():
+    other_options = """
+Type in one of the following numbers and press ENTER to specify your choice:
+
+[0] Return to main menu.
+
+[1] Fetch updated list of compatible courts.
+    (You use these names in your input CSV.                                          )
+    (The list is always being updated and changes are not immediately added to Github)
+
+[2] Log Out of Docket Alarm.
+
+Enter your response below.[0/1/2]
+    """
+    print(other_options)
+    userChoice = input()
+    if userChoice == "0":
+        main.clear()
+        main.welcome()
+    elif userChoice == "1":
+        main.clear()
+        print("Fetching updated court list...")
+        fetch_updated_court_list.fetch_updated_court_list()
+        print("Done.")
+        input()
+        main.welcome()
+    elif userChoice == "2":
+        main.clear()
+        user = login.Credentials()
+        print("\nAre you sure you want to log out of Docket Alarm?[Y/n]")
+        userChoice = input()
+        if userChoice.upper() == "Y":
+            user.logout()
+            main.clear()
+            login.login_interface()
+        else:
+            main.clear()
+            other_options_menu()
+    else:
+        print("Please Enter Valid input (0, 1 or 2)")
+
+

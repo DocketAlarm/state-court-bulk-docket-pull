@@ -1,5 +1,4 @@
 # Built-in Modules
-from tools import utilities
 import os
 # Third-party Modules
 from colorama import init, Fore, Back, Style
@@ -90,7 +89,9 @@ Type in one of the following numbers and press ENTER to specify your choice:
     ( Only select 3 if you already have a directory full of JSON files. )
     ( The JSON files are needed to extract the download links from.     )
 
-Enter your response below.
+[4] More options.
+
+Enter your response below.[1/2/3/4]
     """
     print(options)
 
@@ -122,7 +123,10 @@ Enter your response below.
             link_list = get_pdfs.get_urls("json-output")
 
             # get_pdfs.multiprocess_download_pdfs(link_list)
-            get_pdfs.thread_download_pdfs(link_list) # development
+            get_pdfs.thread_download_pdfs(link_list)
+        elif userChoice == "4":
+            clear()
+            menus.other_options_menu()
 
         # If the user enters anything other than a valid choice, then it tells them their choice is invalid and
         # restarts this function, prompting them to make a choice again.
