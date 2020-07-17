@@ -114,7 +114,7 @@ def download_json_from_list_of_tuples(result_tuple):
             with open(filePathNameWExt, 'w') as fp:
 
                 # Then we write the data to the newly created .json file.
-                json.dump(result_json,fp)
+                json.dump(result_json,fp, indent=3)
 
     except Exception as e:
         print("\nError writing json file.\nReference the documentation for more information\n")
