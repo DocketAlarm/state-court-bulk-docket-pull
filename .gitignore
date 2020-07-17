@@ -32,3 +32,5 @@ csv/error.csv
 log/*.csv
 log/*.xlsx
 
+# Virtual environment
+/venv/
