@@ -106,6 +106,8 @@ Enter your response below.[1/2/3/4]
         if userChoice == "1":
             clear()
             menus.select_paths_menu()
+            clear()
+            menus.specify_client_matter_menu()
             print(msg)
             get_json_and_pdfs()
         # Choice 2 is donwloading only JSON files.
@@ -113,12 +115,14 @@ Enter your response below.[1/2/3/4]
             clear()
             menus.select_paths_menu(pdfOption=False)
             print(msg)
+            menus.specify_client_matter_menu()
             # get_json.loop_dataframe()
             get_json.thread_download_json()
         # Choice 3 is downloading only PDF files.
         elif userChoice == "3":
             clear()
             menus.select_paths_menu()
+            menus.specify_client_matter_menu()
             print(msg)
             link_list = get_pdfs.get_urls("json-output")
 

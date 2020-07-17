@@ -118,4 +118,11 @@ Enter your response below.[0/1/2]
     else:
         print("Please Enter Valid input (0, 1 or 2)")
 
+def specify_client_matter_menu():
+    main.clear()
+    print("Please enter the client or matter code used to bill this search. Max length is 50 characters.\n(If unsure or not applicable, leave blank and press ENTER.)")
+    user_input = input()
+    global_variables.CLIENT_MATTER = user_input
+    main.clear()
+    return
 

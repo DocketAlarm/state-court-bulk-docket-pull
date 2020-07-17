@@ -7,7 +7,7 @@ import stdiomask
 import main
 import requests
 
-def store_user_info_locally(username, password, client_matter=""):
+def store_user_info_locally(username, password):
     """
     Takes in 3 strings as arguments, a username, a password, and the client matter.
     Saves them as a dictionary in a .pickle file in the 'sav' folder to be used later.
@@ -18,7 +18,6 @@ def store_user_info_locally(username, password, client_matter=""):
     credentials_dict = {
         'username':username,
         'password':password,
-        'client_matter': client_matter,
     }
 
     # We choose a file location to save the dictionary to.
@@ -51,7 +50,6 @@ class Credentials:
         # by setting the below attributes, we can reference the username by calling credentials_object.username, and so on.
         self.username = credentials_dict['username']
         self.password = credentials_dict['password']
-        self.client_matter = credentials_dict['client_matter']
 
     def authenticate(self):
         # """Returns the authentication token to make API calls. Make sure that auth.py is filled out!"""
@@ -63,7 +61,6 @@ class Credentials:
         data = {
             'username': self.username,
             'password': self.password,
-            'client_matter': self.client_matter,
             }
 
         # We save the response to a variable. The response is a json object containing
@@ -106,7 +103,6 @@ def login_interface():
     data = {
         'username':input_username,
         'password':input_password,
-        'client_matter':input_client_matter,
         }
     # We save the response to a variable. The response is a json object containing
     # our authentication key iside the json key named 'login_token'
@@ -124,7 +120,7 @@ def login_interface():
     else:
         # If the login is a success, we store the user info in a pickle file to be accessed later.
         # That way, the program can log in automatically every time the script is run afterwards.
-        store_user_info_locally(input_username, input_password, input_client_matter)
+        store_user_info_locally(input_username, input_password)
 
 
     
