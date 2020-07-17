@@ -1,7 +1,11 @@
 # Built-in Modules
 import tkinter
 from tkinter import filedialog 
+import os
 
+CURRENT_DIR = os.path.dirname(__file__)
+
+FILEBROWSER_CSV_INITIAL_DIR = os.path.join(CURRENT_DIR, 'csv')
 
 def browseCSVFiles():
     """
@@ -28,7 +32,7 @@ def browseCSVFiles():
     # Title allows you to display text instructions on the box.
     # filetypes allows you to specify what filetypes the user is allowed to select,
     # the first filetype listed is the default.
-    root.filename = filedialog.askopenfilename(initialdir = "csv", 
+    root.filename = filedialog.askopenfilename(initialdir = FILEBROWSER_CSV_INITIAL_DIR, 
                                           title = "Select a File", 
                                           filetypes = (("Comma Separated Values files", 
                                                         "*.csv*"), 

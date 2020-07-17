@@ -11,18 +11,33 @@
 /*.pyc
 /*/*.pyc
 *.pyc
+/project/__pycache__
 
 # Filled out templates
-/csv/input.csv
-/config/auth.py
-csv/quick-test.csv
-csv/error.csv
+/project/csv/*
+!/project/csv/input.example.csv
 
 # Output files
 /pdf-output/*
 !pdf-output/.gitkeep
 json-output/*.json
 docs/updated-courts.txt
+
+/project/log/*
+!/project/log/.gitkeep
+
+/project/json-output/*
+!/project/json-output/.gitkeep
+
+/project/pdf-output/*
+!/project/pdf-output/.gitkeep
+
+/project/sav/*
+!/project/sav/.gitkeep
+
+
+
+
 
 # Error logs
 /logs/*.txt
