@@ -1,6 +1,9 @@
 import requests
 import os
-from modules import login
+import login
+import global_variables
+
+CURRENT_DIR = os.path.dirname(__file__)
 
 def fetch_updated_court_list():
     """
@@ -17,7 +20,7 @@ def fetch_updated_court_list():
 
     data = {
         'login_token':user.authenticate(),
-        'client_matter': user.client_matter,
+        'client_matter': global_variables.CLIENT_MATTER,
     }
 
     # returns a json object
@@ -31,7 +34,7 @@ def fetch_updated_court_list():
     courts = result_json['courts']
 
     # Designates the file path where the new list of courts will be stored
-    updated_courts_output_file = os.path.join("docs", "updated-courts.txt")
+    updated_courts_output_file = os.path.join(CURRENT_DIR,"docs", "updated-courts.txt")
 
     # Deletes an old copy of this file if one exists
     try:

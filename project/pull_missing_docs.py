@@ -1,5 +1,5 @@
 import requests
-from modules import get_json
+import get_json
 
 def search_direct(docketnum, court):
     """ Takes in the name of a party and the docket number as a parameter,

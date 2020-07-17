@@ -4,8 +4,10 @@ import os
 # Third-party Modules
 import stdiomask
 # Internal Modules
-import main
+import __main__
 import requests
+
+CURRENT_DIR = os.path.dirname(__file__)
 
 def store_user_info_locally(username, password):
     """
@@ -21,7 +23,7 @@ def store_user_info_locally(username, password):
     }
 
     # We choose a file location to save the dictionary to.
-    output_path = os.path.join("sav", "credentials.pickle")
+    output_path = os.path.join(CURRENT_DIR, "sav", "credentials.pickle")
     # We open a .pickle file to save the dictionary in, which can store python variables to be accessed later.
     # This allows the program to not have to ask the user to log in every time they use the script.
     pickle_out = open(output_path, "wb")
@@ -40,7 +42,7 @@ class Credentials:
     # This is the code that is run when we initialize a new instance of this object
     def __init__(self):
         # We get the path to the .pickle file the user credentials information is stored in.
-        input_path = os.path.join("sav", "credentials.pickle")
+        input_path = os.path.join(CURRENT_DIR, "sav", "credentials.pickle")
         # We open it up...
         pickle_in = open(input_path, "rb")
         # We store the dictionary inside of it to a variable...
@@ -81,7 +83,7 @@ class Credentials:
         return login_token
 
     def logout(self):
-        os.remove(os.path.join("sav", "credentials.pickle"))
+        os.remove(os.path.join(CURRENT_DIR, "sav", "credentials.pickle"))
 
 def login_interface():
     """
@@ -89,13 +91,13 @@ def login_interface():
     """
     print("\nPlease enter your Docket Alarm username and press ENTER.\n")
     input_username = input()
-    main.clear()
+    __main__.clear()
     print("\nPlease enter your Docket Alarm password and press ENTER\n(This will be stored securely on your local machine)\n")
     input_password = stdiomask.getpass(mask="*", prompt="")
-    main.clear()
+    __main__.clear()
     print("\nIf applicable, please enter your client matter.\nIf unsure, leave blank and press ENTER\n")
     input_client_matter = input()
-    main.clear()
+    __main__.clear()
     # This is the endpoint for logging in to Docket Alarm from the API.
     login_url = "https://www.docketalarm.com/api/v1/login/"
     # The data we will send to the endpoint with our post request will be

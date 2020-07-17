@@ -1,21 +1,23 @@
 import PySimpleGUI as sg
 
-from modules import global_variables
+import global_variables
 
-from modules import get_pdfs
+import get_pdfs
 
-from modules import get_json
+import get_json
 
-from modules import login
+import login
 
 import os
 
-import main
+import __main__
 import pandas as pd
 
 import requests
 
 import json
+
+CURRENT_DIR = os.path.dirname(__file__)
 
 # This function makes it so when the user selects file paths for the csv, json files, and pdf files,
 # their choices will be saved to the global variables in modules/global_variables.py, that way these paths
@@ -31,7 +33,7 @@ def declare_globals(event, values):
 # The first layout is the screen where you choose your paths and select what files you want to download.
 layout = [
     [sg.Txt('Input CSV')],
-    [sg.Input(os.path.abspath(os.path.join("csv", "input.csv")),size=(50,1), key="pathCSV"), sg.FileBrowse("Browse", key="browseCSV", initial_folder="csv", file_types=(("CSV Files", "*.csv"),))],
+    [sg.Input(os.path.abspath(os.path.join(CURRENT_DIR,"csv", "input.csv")),size=(50,1), key="pathCSV"), sg.FileBrowse("Browse", key="browseCSV", initial_folder="csv", file_types=(("CSV Files", "*.csv"),))],
     [sg.Txt('JSON Directory')],
     [sg.Input(os.path.abspath("json-output"),size=(50,1), key="pathJSON"), sg.FolderBrowse("Browse", key="browseJSON",initial_folder="json-output")],
     [sg.Txt('PDF Directory')],
@@ -125,7 +127,7 @@ def display_main_window():
             # to reference their choice.
             declare_globals(event, values)
             # Downloads JSON files and PDF files.
-            main.get_json_and_pdfs()
+            __main__.get_json_and_pdfs()
         # If the user selects the 'Get JSON' button, we run the function that gets JSON files.
         if event == "getJSON":
             # Sets the path choices specified as the global variables that can be used throughout the whole program
@@ -158,7 +160,7 @@ def gui_run():
     user can select their filepaths and what files they want to download.
     """
     # If there is no file stored locally containing valid login credentials...
-    if not os.path.isfile(os.path.join("sav", "credentials.pickle")):
+    if not os.path.isfile(os.path.join(CURRENT_DIR, "sav", "credentials.pickle")):
         # Prompt the user to enter their login info.
         display_login_window()
     # If there is a file stored locally containing valid login credentials...

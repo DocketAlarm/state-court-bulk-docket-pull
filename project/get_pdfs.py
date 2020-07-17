@@ -13,11 +13,13 @@ from tqdm import tqdm
 import requests
 import PyPDF2 #DEV
 # Internal Modules
-from config import config
-from modules import file_browser, global_variables
+import config
+import file_browser, global_variables
 import gui #DEV
-from modules import log_errors_to_table
-from modules import login
+import log_errors_to_table
+import login
+
+CURRENT_DIR = os.path.dirname(__file__)
 
 # Reinforces that the variables defined in the global_variables module, and then edited from within other modules,
 # continue to have the value that the user changed it to.
@@ -25,8 +27,11 @@ from modules import login
 global_variables.PDF_OUTPUT_PATH = global_variables.PDF_OUTPUT_PATH
 global_variables.CLIENT_MATTER = global_variables.CLIENT_MATTER
 
+# We create an instance of a lock object. We use this later when we download json with threads, to ensure that no 
+# two threads try to access data in the same place at the same time, causing problems.
 lock = threading.Lock()
 
+# We create an ErrorTable object where we can write errors to an xlsx file as they come and then save the file at the end of the download.
 tableErrorLog = log_errors_to_table.ErrorTable()
 
 def cleanhtml(raw_html):
@@ -74,7 +79,7 @@ def get_urls(input_directory):
     # The absolute path of the 'result' folder
     input_directory = global_variables.JSON_INPUT_OUTPUT_PATH
 
-
+    # The client matter the user specified in the menus.
     CLIENT_MATTER = global_variables.CLIENT_MATTER
 
     if os.path.isdir(input_directory) == False:
@@ -163,8 +168,8 @@ def get_urls(input_directory):
                                 exhibitName = f"Exhibit {exhibitNumber} - {docNum} - {docName}"
 
                                 # We package the name, link, and filename together in a tuple, that will be passed as an argument to our
-                                # download_from_link_list() function within the multiprocess_download_pdfs() function where we use imap to
-                                # downloading with multiprocessing functionality.
+                                # download_from_link_list() function within the thread_download_pdfs() function where we use map to
+                                # downloading with seperate threads, speeding things up.
                                 exhibitLink_tuple = (exhibitLink, exhibitName, base_filename, PDF_OUTPUT_PATH, CLIENT_MATTER)
                                 pdf_list.append(exhibitLink_tuple)
 
@@ -184,8 +189,10 @@ def download_from_link_list(link_list):
     This function Isn't made to be used on its own, but can be.
     """
 
+    # We store a user object we can use to login
     user = login.Credentials()
 
+    # We unpack the tuple, assigning each value to a human-readable variable name.
     link, fileName, folderName, outputPath, CLIENT_MATTER = link_list
 
     # The directory where we will create the subdirectories within for each individual docket
@@ -193,8 +200,9 @@ def download_from_link_list(link_list):
     # The path we are saving the file to, inside the subdirectory we will create.
     outputFilePath = os.path.join(outputDirectoryPath, f"{fileName}.pdf")
     
-    # If the directory for the docket doesn't yet exist...
-    with lock: # DEVELOPMENT
+    # We open a lock so threads can't run this block of code simultaneously since that would cause errors
+    with lock: 
+        # If the directory for the docket doesn't yet exist...
         if not os.path.exists(outputDirectoryPath):
 
             # Then, create it!
@@ -211,16 +219,20 @@ def download_from_link_list(link_list):
     result = requests.get(link, stream=True, params=params)
 
     try:
-        result.raise_for_status() #DEV
+        # If the http request failed, we have it throw a detailed error message. This is not immediately shown to the user and we let the donwload
+        # continue for now.
+        result.raise_for_status()
     
     except Exception as a:
         timeNow = datetime.datetime.now().strftime("%I:%M%p %B %d, %Y")
         with lock:
-            with open(os.path.join('log', 'log.txt'), 'a') as errorlog:
+            # We write the error to log/log.txt with a timestamp and detailed information about which case caused the error.
+            with open(os.path.join(CURRENT_DIR, 'log', 'log.txt'), 'a') as errorlog:
                 errorlog.write(f"\n{timeNow}\n")
                 errorlog.write(f"{a}")
                 errorlog.write(f"\n{link}\n{fileName}\n{folderName}\n{outputPath}\n------------------")
         
+            # We write the error to a csv file that will be stored in the log folder when the download finishes.
             tableErrorLog.append_error_table(f"{a}", folderName, fileName)
 
 
@@ -275,8 +287,13 @@ def thread_download_pdfs(link_list):
     # If any PDFs will not open, then they wil be displayed in this PDF.
     # The file will be in the log folder and will be named according to the date and time when
     # the download finished.
-    tableErrorLog.error_excel_save(os.path.join("log", f"logTable - {currentDateTime}.xlsx"))
+    tableErrorLog.error_excel_save(os.path.join(CURRENT_DIR, "log", f"logTable - {currentDateTime}.xlsx"))
     # We must return results to make the progress bar work.
+    try:
+        os.startfile(global_variables.PDF_OUTPUT_PATH)
+    except:
+        pass
+        
     return results
 
 

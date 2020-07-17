@@ -3,14 +3,15 @@ import os
 # Third-party Modules
 from colorama import init, Fore, Back, Style
 # Internal Modules
-from modules import get_json, get_pdfs, login, menus, file_browser, global_variables
-from config import config
+import get_json, get_pdfs, login, menus, file_browser, global_variables
+import config
 import gui
 
 
 # Inititalizes Colorama functionality, allowing us to write text to the terminal in different colors.
 init()
 
+CURRENT_DIR = os.path.dirname(__file__)
 
 msg = Fore.YELLOW + """
   _____             _        _              _                                 _____ _____ 
@@ -18,17 +19,24 @@ msg = Fore.YELLOW + """
  | |  | | ___   ___| | _____| |_     /  \  | | __ _ _ __ _ __ ___      /  \  | |__) || |  
  | |  | |/ _ \ / __| |/ / _ \ __|   / /\ \ | |/ _` | '__| '_ ` _ \    / /\ \ |  ___/ | |  
  | |__| | (_) | (__|   <  __/ |_   / ____ \| | (_| | |  | | | | | |  / ____ \| |    _| |_ 
- |_____/ \___/ \___|_|\_\___|\__|_/_/    \_\_|\__,_|_|  |_| |_| |_| /_/    \_\_|   |_____|
-  / ____| |      | |        / ____|               | |                                     
- | (___ | |_ __ _| |_ ___  | |     ___  _   _ _ __| |_                                    
-  \___ \| __/ _` | __/ _ \ | |    / _ \| | | | '__| __|                                   
-  ____) | || (_| | ||  __/ | |___| (_) | |_| | |  | |_                                    
- |_____/ \__\__,_|\__\___|__\_____\___/ \__,_|_|  _\__| _____       _ _                   
- |  _ \      | | |    |  __ \           | |      | |   |  __ \     | | |                  
- | |_) |_   _| | | __ | |  | | ___   ___| | _____| |_  | |__) |   _| | |                  
- |  _ <| | | | | |/ / | |  | |/ _ \ / __| |/ / _ \ __| |  ___/ | | | | |                  
- | |_) | |_| | |   <  | |__| | (_) | (__|   <  __/ |_  | |   | |_| | | |                  
- |____/ \__,_|_|_|\_\ |_____/ \___/ \___|_|\_\___|\__| |_|    \__,_|_|_|                  
+ |_____/ \___/_\___|_|\_\___|\__| /_/    \_\_|\__,_|_|  |_| |_| |_| /_/    \_\_|   |_____|
+ |  _ \      | | |    |  __ \                    | |               | |                    
+ | |_) |_   _| | | __ | |  | | _____      ___ __ | | ___   __ _  __| |                    
+ |  _ <| | | | | |/ / | |  | |/ _ \ \ /\ / / '_ \| |/ _ \ / _` |/ _` |                    
+ | |_) | |_| | |   <  | |__| | (_) \ V  V /| | | | | (_) | (_| | (_| |                    
+ |____/ \__,_|_|_|\_\ |_____/ \___/ \_/\_/ |_| |_|_|\___/ \__,_|\__,_|                    
+                                                                                          
+"""
+
+feesNotice = """
+[Document Fees]
+
+Courts may charge a fee to access certain documents. Docket Alarm passes their fee on
+without markup. After the first access, later access does not incur a fee.
+Contact Docket Alarm Support for information on specific fees associated with
+particular courts.
+
+Press ENTER to continue. 
 """
 def clear():
     """clears the terminal"""
@@ -46,9 +54,12 @@ def welcome():
     print("Welcome!")
     input("Press ENTER key to begin!")
     clear()
+    print(feesNotice)
+    input()
+    clear()
 
     # Checks to see if the account information was stored on the local machine previously
-    if not os.path.isfile(os.path.join("sav", "credentials.pickle")):
+    if not os.path.isfile(os.path.join(CURRENT_DIR, "sav", "credentials.pickle")):
 
         # If the user hasn't successfullly logged in before, it takes them to a menu sequence to log in, and saves the info locally
         # for the next time the script is run.
@@ -138,7 +149,11 @@ Enter your response below.[1/2/3/4]
             return handle_input()
 
     handle_input()
-
+    try:
+        os.startfile(os.path.join(CURRENT_DIR, "log"))
+    except:
+        pass
+        
     print("\nDone.")
     input()
 

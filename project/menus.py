@@ -1,9 +1,12 @@
 # Built In Modules
 import os
+# Third-party Modules
+from colorama import init, Fore, Back, Style
 # Internal Modules
-from modules import global_variables, file_browser, fetch_updated_court_list, login
-import main
+import global_variables, file_browser, fetch_updated_court_list, login
+import __main__
 
+init()
 
 def select_paths_menu(pdfOption=True):
     """
@@ -16,6 +19,7 @@ def select_paths_menu(pdfOption=True):
     if pdfOption == True:
         print(f"[3] PDF Files are saved to:\n{os.path.abspath(global_variables.PDF_OUTPUT_PATH)}\n")
     print("To change these paths. Type the number for the path you want to change and press ENTER.\n")
+    print(Fore.RED + "[WARNING] A lot of files can be generated in the PDF and JSON directories you choose! Choose carefully!\n" + Style.RESET_ALL)
     print("If you are happy with the current selection, simply press ENTER.\n")
 
     # Prompts the user for a choice and saves it in a variable.
@@ -34,7 +38,7 @@ def select_paths_menu(pdfOption=True):
         # we need to access this choice.
         global_variables.CSV_INPUT_PATH = csvChoice
 
-        main.clear()
+        __main__.clear()
 
         # Reloads path select menu, relflecting any changes.
         select_paths_menu()
@@ -52,7 +56,7 @@ def select_paths_menu(pdfOption=True):
         # not only in the context of this file.
         global_variables.JSON_INPUT_OUTPUT_PATH = jsonChoice
 
-        main.clear()
+        __main__.clear()
         # Reloads path select menu, relflecting any changes.
         select_paths_menu()
 
@@ -69,13 +73,13 @@ def select_paths_menu(pdfOption=True):
         # we need to access this path.
         global_variables.PDF_OUTPUT_PATH = pdfChoice
 
-        main.clear()
+        __main__.clear()
         # Reloads path select menu, relflecting any changes.
         select_paths_menu()
 
     # If the user doesnt make a choice and just presses ENTER, the program exits this menu and moves forward
     else:
-        main.clear()
+        __main__.clear()
 
 def other_options_menu():
     other_options = """
@@ -94,35 +98,35 @@ Enter your response below.[0/1/2]
     print(other_options)
     userChoice = input()
     if userChoice == "0":
-        main.clear()
-        main.welcome()
+        __main__.clear()
+        __main__.welcome()
     elif userChoice == "1":
-        main.clear()
+        __main__.clear()
         print("Fetching updated court list...")
         fetch_updated_court_list.fetch_updated_court_list()
         print("Done.")
         input()
-        main.welcome()
+        __main__.welcome()
     elif userChoice == "2":
-        main.clear()
+        __main__.clear()
         user = login.Credentials()
         print("\nAre you sure you want to log out of Docket Alarm?[Y/n]")
         userChoice = input()
         if userChoice.upper() == "Y":
             user.logout()
-            main.clear()
-            login.login_interface()
+            __main__.clear()
+            __main__.welcome()
         else:
-            main.clear()
+            __main__.clear()
             other_options_menu()
     else:
         print("Please Enter Valid input (0, 1 or 2)")
 
 def specify_client_matter_menu():
-    main.clear()
+    __main__.clear()
     print("Please enter the client or matter code used to bill this search. Max length is 50 characters.\n(If unsure or not applicable, leave blank and press ENTER.)")
     user_input = input()
     global_variables.CLIENT_MATTER = user_input
-    main.clear()
+    __main__.clear()
     return
 
