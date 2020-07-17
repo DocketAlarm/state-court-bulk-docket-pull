@@ -24,10 +24,15 @@ import PySimpleGUI as sg
 # It may look redundant, but without this line, the script only uses the default variable, without reflecting changes.
 
 global_variables.JSON_INPUT_OUTPUT_PATH = global_variables.JSON_INPUT_OUTPUT_PATH
+global_variables.CLIENT_MATTER = global_variables.CLIENT_MATTER
+
+lock = threading.Lock()
+
 
 def table_to_list_of_tuples():
     spreadsheet_path = global_variables.CSV_INPUT_PATH
     JSON_INPUT_OUTPUT_PATH = global_variables.JSON_INPUT_OUTPUT_PATH
+    CLIENT_MATTER = global_variables.CLIENT_MATTER
     output_list_of_tuples = []
 
     try:
@@ -42,7 +47,7 @@ def table_to_list_of_tuples():
         caseName = row[0]
         caseNo = row[1]
         caseCourt = row[2]
-        row_tuple = (caseName, caseNo, caseCourt, JSON_INPUT_OUTPUT_PATH)
+        row_tuple = (caseName, caseNo, caseCourt, JSON_INPUT_OUTPUT_PATH, CLIENT_MATTER)
         output_list_of_tuples.append(row_tuple)
     
     return output_list_of_tuples
@@ -50,7 +55,7 @@ def table_to_list_of_tuples():
 @retry
 def download_json_from_list_of_tuples(result_tuple):
 
-    caseName, caseNo, caseCourt, JSON_INPUT_OUTPUT_PATH = result_tuple
+    caseName, caseNo, caseCourt, JSON_INPUT_OUTPUT_PATH, CLIENT_MATTER = result_tuple
 
     user = login.Credentials()
 
@@ -62,7 +67,7 @@ def download_json_from_list_of_tuples(result_tuple):
         # The token generated after logging in.
         'login_token': user.authenticate(),
         # The reason for use
-        'client_matter': user.client_matter,
+        'client_matter': CLIENT_MATTER,
         # The court we want to search.
         'court': caseCourt,
         # The docket number we want data for
@@ -75,7 +80,7 @@ def download_json_from_list_of_tuples(result_tuple):
 
     # Makes the api call. We specify the endpoint and the parameters as arguments. The results of the API call are returned and
     # stored to a variable. 
-    result = requests.get(getdocket_url, data, timeout=100)
+    result = requests.get(getdocket_url, data)
 
     
 
@@ -105,10 +110,11 @@ def download_json_from_list_of_tuples(result_tuple):
 
         # When 'opening' a file that doesn't yet exist, we create that file.
         # Here, we create the json file we'll be saving the data to.
-        with open(filePathNameWExt, 'w') as fp:
+        with lock:
+            with open(filePathNameWExt, 'w') as fp:
 
-            # Then we write the data to the newly created .json file.
-            json.dump(result_json,fp)
+                # Then we write the data to the newly created .json file.
+                json.dump(result_json,fp, indent=3)
 
     except Exception as e:
         print("\nError writing json file.\nReference the documentation for more information\n")

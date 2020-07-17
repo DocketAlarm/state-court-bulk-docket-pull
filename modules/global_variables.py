@@ -8,3 +8,5 @@ JSON_INPUT_OUTPUT_PATH = "json-output"
 
 # The path wherer the folders full of pdfs will be saved to
 PDF_OUTPUT_PATH = "pdf-output"
+
+CLIENT_MATTER = ""

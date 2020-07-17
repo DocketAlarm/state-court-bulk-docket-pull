@@ -23,6 +23,7 @@ from modules import login
 # continue to have the value that the user changed it to.
 # It may look redundant, but without this line, the script only uses the default variable, without reflecting changes.
 global_variables.PDF_OUTPUT_PATH = global_variables.PDF_OUTPUT_PATH
+global_variables.CLIENT_MATTER = global_variables.CLIENT_MATTER
 
 lock = threading.Lock()
 
@@ -72,6 +73,9 @@ def get_urls(input_directory):
 
     # The absolute path of the 'result' folder
     input_directory = global_variables.JSON_INPUT_OUTPUT_PATH
+
+
+    CLIENT_MATTER = global_variables.CLIENT_MATTER
 
     if os.path.isdir(input_directory) == False:
         print("[ERROR] Could not write PDF files.\nMake sure 'json-output' folder exists in the root directroy of the program.\nCheck documentation for more information.\n")
@@ -134,7 +138,7 @@ def get_urls(input_directory):
 
                         link_filename = f"{docNum} - {docName}"
 
-                        link_tuple = (link, link_filename, base_filename, PDF_OUTPUT_PATH)
+                        link_tuple = (link, link_filename, base_filename, PDF_OUTPUT_PATH, CLIENT_MATTER)
                         # Add the found link to the list, which will ultimately be returned at the end of the function.
                         pdf_list.append(link_tuple)
 
@@ -161,7 +165,7 @@ def get_urls(input_directory):
                                 # We package the name, link, and filename together in a tuple, that will be passed as an argument to our
                                 # download_from_link_list() function within the multiprocess_download_pdfs() function where we use imap to
                                 # downloading with multiprocessing functionality.
-                                exhibitLink_tuple = (exhibitLink, exhibitName, base_filename), PDF_OUTPUT_PATH
+                                exhibitLink_tuple = (exhibitLink, exhibitName, base_filename, PDF_OUTPUT_PATH, CLIENT_MATTER)
                                 pdf_list.append(exhibitLink_tuple)
 
             # We close the file when we are done. This also ensures that the file is saved.    
@@ -182,8 +186,8 @@ def download_from_link_list(link_list):
 
     user = login.Credentials()
 
-    link, fileName, folderName, outputPath = link_list
-    
+    link, fileName, folderName, outputPath, CLIENT_MATTER = link_list
+
     # The directory where we will create the subdirectories within for each individual docket
     outputDirectoryPath = os.path.join(outputPath, folderName)
     # The path we are saving the file to, inside the subdirectory we will create.
@@ -198,7 +202,10 @@ def download_from_link_list(link_list):
     
     
     # We ready our authentication token to pass as a paramater with our http request to get the pdf file. You must be logged in to access the files.
-    params = {"login_token": user.authenticate()}
+    params = {
+            "login_token": user.authenticate(),
+            "client_matter": CLIENT_MATTER,
+            }
 
     # We then make an http request to the pdf link and save the result in a variable. We pass the authentication token as a parameter.
     result = requests.get(link, stream=True, params=params)
