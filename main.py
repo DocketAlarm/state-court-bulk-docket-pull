@@ -114,9 +114,8 @@ Enter your response below.[1/2/3/4]
         elif userChoice == "2":
             clear()
             menus.select_paths_menu(pdfOption=False)
-            print(msg)
             menus.specify_client_matter_menu()
-            # get_json.loop_dataframe()
+            print(msg)
             get_json.thread_download_json()
         # Choice 3 is downloading only PDF files.
         elif userChoice == "3":
