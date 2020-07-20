@@ -15,7 +15,6 @@ from tqdm import tqdm
 # Internal Modules
 import config
 import login, file_browser, global_variables
-import __main__
 import gui #DEV
 import PySimpleGUI as sg
 

@@ -53,6 +53,6 @@ def browseDirectories(initialdir):
     root.withdraw()
 
     # Opens the file browser and returns the path to the directory the user selected as a string.
-    root.directory = filedialog.askdirectory(initialdir = initialdir, title ="Choose PDF Output Directory")
+    root.directory = filedialog.askdirectory(initialdir = os.path.join(CURRENT_DIR, initialdir), title ="Choose PDF Output Directory")
     return root.directory
 

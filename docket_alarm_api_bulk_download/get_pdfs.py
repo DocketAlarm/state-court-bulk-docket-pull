@@ -12,6 +12,7 @@ from progress.bar import IncrementalBar
 from tqdm import tqdm
 import requests
 import PyPDF2 #DEV
+from retrying import retry
 # Internal Modules
 import config
 import file_browser, global_variables
@@ -177,7 +178,7 @@ def get_urls(input_directory):
             jsonFile.close()
     return pdf_list
 
-# def download_from_link_list(link, fileName, folderName, outputPath):
+@retry
 def download_from_link_list(link_list):
     """
     Downloads PDF documents from the web and saves them in a specified folder.

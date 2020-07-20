@@ -1,11 +1,14 @@
 # Built-in Modules
-import pickle
 import os
+import sys
+file_dir = os.path.dirname(__file__)
+sys.path.append(file_dir)
+import pickle
 # Third-party Modules
 import stdiomask
 # Internal Modules
-import __main__
 import requests
+import menus
 
 CURRENT_DIR = os.path.dirname(__file__)
 
@@ -91,13 +94,10 @@ def login_interface():
     """
     print("\nPlease enter your Docket Alarm username and press ENTER.\n")
     input_username = input()
-    __main__.clear()
+    menus.clear()
     print("\nPlease enter your Docket Alarm password and press ENTER\n(This will be stored securely on your local machine)\n")
     input_password = stdiomask.getpass(mask="*", prompt="")
-    __main__.clear()
-    print("\nIf applicable, please enter your client matter.\nIf unsure, leave blank and press ENTER\n")
-    input_client_matter = input()
-    __main__.clear()
+    menus.clear()
     # This is the endpoint for logging in to Docket Alarm from the API.
     login_url = "https://www.docketalarm.com/api/v1/login/"
     # The data we will send to the endpoint with our post request will be
