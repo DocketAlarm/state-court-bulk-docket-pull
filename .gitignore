@@ -1,51 +1,33 @@
 # text editor cache files
 /.vscode
 
-# authentication information
-/auth.py
-/sav/*.pickle
-
 # compiled python files
+/__pycache__/
 /__pycache__/*
 /*/__pycache__/*
 /*.pyc
 /*/*.pyc
 *.pyc
-/project/__pycache__
+/docket_alarm_api_bulk_download/__pycache__
 
 # Filled out templates
-/project/csv/*
-!/project/csv/input.example.csv
-
-# Output files
-/pdf-output/*
-!pdf-output/.gitkeep
-json-output/*.json
-docs/updated-courts.txt
-
-/project/log/*
-!/project/log/.gitkeep
-
-/project/json-output/*
-!/project/json-output/.gitkeep
-
-/project/pdf-output/*
-!/project/pdf-output/.gitkeep
-
-/project/sav/*
-!/project/sav/.gitkeep
+/docket_alarm_api_bulk_download/csv/*
+!/docket_alarm_api_bulk_download/csv/input.example.csv
 
 
 
+/docket_alarm_api_bulk_download/log/*
+!/docket_alarm_api_bulk_download/log/.gitkeep
 
+/docket_alarm_api_bulk_download/json-output/*
+!/docket_alarm_api_bulk_download/json-output/.gitkeep
 
-# Error logs
-/logs/*.txt
-log/log.txt
-log/log.csv
-csv/error.csv
-log/*.csv
-log/*.xlsx
+/docket_alarm_api_bulk_download/pdf-output/*
+!/docket_alarm_api_bulk_download/pdf-output/.gitkeep
+
+/docket_alarm_api_bulk_download/sav/*
+!/docket_alarm_api_bulk_download/sav/.gitkeep
+
 
 # Virtual environment
 /venv/

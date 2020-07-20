@@ -1,2 +1,2 @@
-python project/__main__.py
+python docket_alarm_api_bulk_download/__main__.py
 pause

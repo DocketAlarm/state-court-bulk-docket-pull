@@ -1,0 +1,2 @@
+include docket_alarm_api_bulk_download/*
+include docket_alarm_api_bulk_download/*/*

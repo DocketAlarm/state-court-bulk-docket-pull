@@ -1,12 +1,14 @@
 # Built-in Modules
 import os
+import sys
+file_dir = os.path.dirname(__file__)
+sys.path.append(file_dir)
 # Third-party Modules
 from colorama import init, Fore, Back, Style
 # Internal Modules
-import get_json, get_pdfs, login, menus, file_browser, global_variables
+import get_json, get_pdfs, login, menus, file_browser, global_variables, fetch_updated_court_list
 import config
 import gui
-
 
 # Inititalizes Colorama functionality, allowing us to write text to the terminal in different colors.
 init()
@@ -177,12 +179,125 @@ def get_json_and_pdfs():
     # speeding up the process.
     get_pdfs.thread_download_pdfs(link_list)
 
+def select_paths_menu(pdfOption=True):
+    """
+    This displays a menu to the user allowing them to choose file paths to save their downloaded data to.
+    It handles their choices and changes the global variables representing the file paths for saving.
+    """
+    print("Below are the current settings for finding and saving files:\n")
+    print(f"[1] The CSV file filled with docket numbers is located at:\n{os.path.abspath(global_variables.CSV_INPUT_PATH)}\n")
+    print(f"[2] JSON Files are saved to and retrieved from:\n{os.path.abspath(global_variables.JSON_INPUT_OUTPUT_PATH)}\n")
+    if pdfOption == True:
+        print(f"[3] PDF Files are saved to:\n{os.path.abspath(global_variables.PDF_OUTPUT_PATH)}\n")
+    print("To change these paths. Type the number for the path you want to change and press ENTER.\n")
+    print(Fore.RED + "[WARNING] A lot of files can be generated in the PDF and JSON directories you choose! Choose carefully!\n" + Style.RESET_ALL)
+    print("If you are happy with the current selection, simply press ENTER.\n")
 
-# This code executes if this function is run directly, rather than being imported from elsewhere.
-if __name__ == '__main__':
-    if config.isGUI == False:
-        # If isGUI is set to False in config/config.py, then the program will run in the command line when this file is executed.
+    # Prompts the user for a choice and saves it in a variable.
+    userChoice = input()
+
+    # Choice 1 is to edit the path to the input csv full of docket numbers.
+    if userChoice == "1":
+        print("Select the path of your input csv file.")
+        print("Press ENTER to open the file browser.")
+        input()
+        
+        # Opens the file browser and returns the path to the file that the user selected.
+        csvChoice = file_browser.browseCSVFiles()
+
+        # We store this choice to a global variable to be used elsewhere in the script where
+        # we need to access this choice.
+        global_variables.CSV_INPUT_PATH = csvChoice
+
+        clear()
+
+        # Reloads path select menu, relflecting any changes.
+        select_paths_menu()
+
+    # Choice 2 is to edit the path to the json files.
+    if userChoice == "2":
+        print("Select the path where you would like to store your JSON files.")
+        print("Press ENTER to open the file browser.")
+        input()
+
+        # Stores the users choice in a variable
+        jsonChoice = file_browser.browseDirectories('json-output')
+
+        # Stores the choice to a global variable so this choice can be used throughout this script,
+        # not only in the context of this file.
+        global_variables.JSON_INPUT_OUTPUT_PATH = jsonChoice
+
+        clear()
+        # Reloads path select menu, relflecting any changes.
+        select_paths_menu()
+
+    # Choice 3 is to edit the path where the folders full of PDF files will be saved.
+    if userChoice == "3":
+        print("Select the path where you would like to store your PDF files.")
+        print("Press ENTER to open the file browser.")
+        input()
+
+        # Opens a file explorer and returns the path to the directory the user selected as a string.
+        pdfChoice = file_browser.browseDirectories('pdf-output')
+
+        # Saves the chosen file path to a global variable so it can be accessed elsewhere in the script when
+        # we need to access this path.
+        global_variables.PDF_OUTPUT_PATH = pdfChoice
+
+        clear()
+        # Reloads path select menu, relflecting any changes.
+        select_paths_menu()
+
+    # If the user doesnt make a choice and just presses ENTER, the program exits this menu and moves forward
+    else:
+        clear()
+
+def other_options_menu():
+    other_options = """
+Type in one of the following numbers and press ENTER to specify your choice:
+
+[0] Return to menu.
+
+[1] Fetch updated list of compatible courts.
+    (You use these names in your input CSV.                                          )
+    (The list is always being updated and changes are not immediately added to Github)
+
+[2] Log Out of Docket Alarm.
+
+Enter your response below.[0/1/2]
+    """
+    print(other_options)
+    userChoice = input()
+    if userChoice == "0":
+        clear()
         welcome()
-    if config.isGUI == True:
-        # If isGUI is set to True in config/config.py, Then the program will open with an experimental GUI. (This is not reccomended as of yet.)
-        gui.gui_run()
+    elif userChoice == "1":
+        clear()
+        print("Fetching updated court list...")
+        fetch_updated_court_list.fetch_updated_court_list()
+        print("Done.")
+        input()
+        welcome()
+    elif userChoice == "2":
+        clear()
+        user = login.Credentials()
+        print("\nAre you sure you want to log out of Docket Alarm?[Y/n]")
+        userChoice = input()
+        if userChoice.upper() == "Y":
+            user.logout()
+            clear()
+            welcome()
+        else:
+            clear()
+            other_options_menu()
+    else:
+        print("Please Enter Valid input (0, 1 or 2)")
+
+def specify_client_matter_menu():
+    clear()
+    print("Please enter the client or matter code used to bill this search. Max length is 50 characters.\n(If unsure or not applicable, leave blank and press ENTER.)")
+    user_input = input()
+    global_variables.CLIENT_MATTER = user_input
+    clear()
+    return
+

@@ -1,20 +1,11 @@
 import PySimpleGUI as sg
-
 import global_variables
-
 import get_pdfs
-
 import get_json
-
 import login
-
 import os
-
-import __main__
 import pandas as pd
-
 import requests
-
 import json
 
 CURRENT_DIR = os.path.dirname(__file__)
@@ -127,7 +118,7 @@ def display_main_window():
             # to reference their choice.
             declare_globals(event, values)
             # Downloads JSON files and PDF files.
-            __main__.get_json_and_pdfs()
+            main.get_json_and_pdfs()
         # If the user selects the 'Get JSON' button, we run the function that gets JSON files.
         if event == "getJSON":
             # Sets the path choices specified as the global variables that can be used throughout the whole program
