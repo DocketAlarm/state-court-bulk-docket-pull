@@ -1,5 +1,5 @@
 ![Docket Alarm Logo](https://github.com/ryanfitz514/state-court-bulk-docket-pull/blob/master/Docket_Alarm.png?raw=true)
-# State Court Bulk Docket Pull
+# Bulk Docket Download
 
 This program allows you to download court case data and documents in bulk.
 A csv file full of case numbers will be taken as input, and the program will automatically download
@@ -19,6 +19,11 @@ all of the files from the Docket Alarm API.
 1. Follow the directions on screen. You will be prompted to choose between downloading JSON files, PDF files, or both.
 1. A file browser will prompt you to select the location of your input csv file.
 1. When your download is complete, a folder will open containing all of your downloaded files.
+
+## For Windows Users
+- You can extract the zip file, and inside you will find ```run.bat``` and ```install-dependencies.bat```
+- Run ```install-dependencies.bat``` to install the dependencies.
+- Run ```run.bat``` to run the program.
 
 ## Supported Court List
 - Supreme Court of the United States
