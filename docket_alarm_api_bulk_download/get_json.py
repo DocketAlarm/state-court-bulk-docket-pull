@@ -141,6 +141,16 @@ def download_json_from_list_of_tuples(result_tuple):
     result_json = result.json()
     # We use .json() to convert the json results to a python dictionary we can more easily work with.
 
+    # If there was a problem with the json data retrieved, and it's been written to the error log, do not write it.
+    # Exits the function.
+    if result_json['success'] == False:
+        timeNow = datetime.datetime.now().strftime("%I:%M%p %B %d, %Y")
+        with open(os.path.join(CURRENT_DIR, 'log', 'log.txt'), 'a') as errorlog:
+            errorlog.write(f"\n{timeNow}\n")
+            errorlog.write("JSON could not be downloaded:\n")
+            errorlog.write(f"{result}: {caseName}, {caseNo}, {caseCourt}\n")
+            errorlog.write("------------------")
+        return
     
     try:
         # Creates the path where our .json file will be saved to
