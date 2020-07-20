@@ -1,4 +1,4 @@
-![Docket-Alarm-Logo](https://s3.us-west-2.amazonaws.com/secure.notion-static.com/96e03473-415c-4cb9-a9b5-d7ab535f5faf/DA-FC_High_Res_Logo.jpg?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=AKIAT73L2G45O3KS52Y5%2F20200717%2Fus-west-2%2Fs3%2Faws4_request&X-Amz-Date=20200717T153116Z&X-Amz-Expires=86400&X-Amz-Signature=0a242a7a876d806aa5b8d49b69c021075e215da7b9afd39fcee5188e5fe98663&X-Amz-SignedHeaders=host&response-content-disposition=filename%20%3D%22DA-FC_High_Res_Logo.jpg%22)
+![Docket Alarm Logo](https://github.com/ryanfitz514/state-court-bulk-docket-pull/blob/master/Docket_Alarm.png?raw=true)
 # State Court Bulk Docket Pull
 
 This program allows you to download court case data and documents in bulk.
