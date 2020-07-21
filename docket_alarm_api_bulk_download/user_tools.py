@@ -7,7 +7,23 @@ import pprint
 # without needing to know how to work with APIs
 
 class Docket:
+    """
+    Creates a Docket object.
+    Takes in your Docket Alarm username and password as a tuple,
+    followed by the docket number as a string,
+    and then the court name as a string as arguments.
+    Optional arguments are a string reperesenting the client matter,
+    whether or not the docket should be the cached version,
+    (Getting uncached dockets may result in extra charges)
+    and whether or not you want party names to be normalized.
 
+    The attributes you can call on a Docket object are:
+    Docket.info,
+    Docket.docket_report,
+    Docket.parties,
+    and Docket.related.
+    Each returns a dictionary with information about the docket.
+    """
     def __init__(self, auth_tuple, docket_number, court_name, client_matter="", cached=True, normalize=True):
         auth_token = authenticate(auth_tuple)
         docket = get_docket(auth_token, docket_number, court_name, client_matter, cached, normalize)
@@ -16,9 +32,30 @@ class Docket:
         self.parties = docket['parties']
         self.related = docket['related']
 
+def search_docket_alarm(auth_tuple, query_string, limit=10):
+    """
+    Args:
+    auth tuple - a tuple containing the username, followed by the password.
+    query_string - Your search query as a string.
+    (optional) limit - the number of results you want to display (Default 10) (Max 50).
+    """
+    limit = str(limit)
+    endpoint = "https://www.docketalarm.com/api/v1/search/"
+    parameters = {
+        "login_token": authenticate(auth_tuple),
+        "q": query_string,
+        "limit": limit,
+    }
+    result = requests.get(endpoint, params=parameters).json()
+    search_results = result['search_results']
+    return search_results
+
 
 def authenticate(auth_tuple):
-
+    """
+    Takes in a username, followed by a password in a tuple as an argument.
+    Returns the authentication token used to authenticate API calls.
+    """
     username, password = auth_tuple
     login_url = "https://www.docketalarm.com/api/v1/login/"
     data = {
@@ -42,7 +79,6 @@ def get_docket(auth_token, docket_number, court_name, client_matter="", cached=T
         'normalize':normalize,
     }
     result = requests.get(endpoint, params).json()
-    pprint.pprint(result, indent=2)
     return result
 
 
