@@ -1,19 +1,20 @@
 from setuptools import find_packages, setup
 import pathlib
 
-with open("README.md") as f:
-    long_description = f.read()
-
 HERE = pathlib.Path(__file__).parent
+
+README = (HERE / "README.md").read_text()
 
 setup(name='docket-alarm-api-bulk-download',
     version='0.0.1',
-    description="Uses the Docket Alarm API to pull state court cases in bulk. Simply supply a spreadsheet full of case numbers!",
-    long_description=long_description,
+    description="Uses the Docket Alarm API to pull state court cases in bulk",
+    long_description=README,
+    long_description_content_type='text/markdown',
+    description_content_type='text/markdown',
     author='Ryan Fitzpatrick',
     author_email='ryanfitz514@gmail.com',
-    url="https://github.com/ryanfitz514/state-court-bulk-docket-pull",
-    license="Apache-2.0 License",
+    url="https://github.com/DocketAlarm/state-court-bulk-docket-pull",
+    license="Apache",
     keywords=['DOCKET', 'ALARM', 'API', 'BULK', 'DOWNLOAD', 'COURT', 'COURTS', 'PACER', 'FASTCASE'],
     packages=["docket_alarm_api_bulk_download"],
     package_dir = {'docket_alarm_api_bulk_download':'docket_alarm_api_bulk_download'},
