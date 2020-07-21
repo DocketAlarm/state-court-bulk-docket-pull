@@ -1,4 +1,4 @@
-<img width=300 src="https://github.com/ryanfitz514/state-court-bulk-docket-pull/blob/master/Docket_Alarm.png?raw=true">
+<img width=300 src="https://github.com/DocketAlarm/state-court-bulk-docket-pull/blob/master/Docket_Alarm.png?raw=true">
 # Bulk Docket Download
 
 Download court case data and documents in bulk.
@@ -10,10 +10,10 @@ all of the files using the Docket Alarm API.
     1. The ```Name``` column is used to name the folders and filenames, use whatever text you would like to identify the docket.
     1. The ```DocketNumber``` column contains docket numbers in the same format they appear in on ```DocketAlarm.com```.
     1. The ```Court``` field must contain the court the docket is filed in. The name of the court must be spelled exactly the same as it appears in our supported court list.
-1. Clone the repository: ```git clone "https://github.com/ryanfitz514/state-court-bulk-docket-pull"```
+1. Clone the repository: ```git clone "https://github.com/DocketAlarm/state-court-bulk-docket-pull.git"```
 1. Enter the root: ```cd state-court-bulk-docket-pull```
 1. Download the dependencies: ```pip install -r docs/requirements.txt```
-1. Run the main.py file: ```python main.py``` (Windows) or ```python3 main.py``` (Unix)
+1. Run python on the project directory: ```python docket_alarm_api_bulk_download``` (Windows) or ```python3 docket_alarm_api_bulk_download``` (Unix)
 1. Log in with your Docket Alarm username and password
 1. Follow the directions on screen. You will be prompted to choose between downloading JSON files, PDF files, or both.
 1. A file browser will prompt you to select the location of your input csv file.
@@ -23,6 +23,10 @@ all of the files using the Docket Alarm API.
 - You can extract the zip file, and inside you will find ```run.bat``` and ```install-dependencies.bat```
 - Run ```install-dependencies.bat``` to install the dependencies.
 - Run ```run.bat``` to run the program.
+
+## Installing from PIP
+- Run ```pip install docket-alarm-api-bulk-download```
+- Run ```docket-alarm-api-bulk-download```
 
 ## Supported Court List
 - Supreme Court of the United States
