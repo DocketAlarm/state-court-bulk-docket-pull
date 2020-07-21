@@ -31,3 +31,8 @@
 
 # Virtual environment
 /venv/
+
+
+# Publishing Distribution Files
+/setup.py
+MANIFEST.in
