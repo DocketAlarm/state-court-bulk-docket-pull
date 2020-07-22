@@ -1,7 +1,9 @@
 import requests
 import pprint
 import pprint
-
+import re
+import json
+import get_pdfs
 # Experimental feature.
 # End user will be able to import this module and create instances of the Docket class to work with the DA API
 # without needing to know how to work with APIs
@@ -27,10 +29,70 @@ class Docket:
     def __init__(self, auth_tuple, docket_number, court_name, client_matter="", cached=True, normalize=True):
         auth_token = authenticate(auth_tuple)
         docket = get_docket(auth_token, docket_number, court_name, client_matter, cached, normalize)
-        self.info = docket['info']
-        self.docket_report = docket['docket_report']
-        self.parties = docket['parties']
-        self.related = docket['related']
+        self.all = docket
+        self.info = docket['info'] if docket['info'] else ""
+        self.docket_report = docket['docket_report'] if docket['docket_report'] else ""
+        self.parties = docket['parties'] if docket['parties'] else ""
+        # self.related = docket['related']
+
+    def links(self):
+
+        pdf_list = []
+
+        docket_report = self.docket_report
+        
+        # If it exists, it saves the value for the docket_report key in a variable.            
+
+        # docket_report will be a list of dictionaries. This loops through each dictionary in the list.
+        for item in docket_report:
+            
+            docName = get_pdfs.cleanhtml(item['contents'])
+
+            docNum = item['number']
+
+
+            # Checks to see if any of the dictionaries inside the list contain a 'link' key
+            if 'link' in item:
+
+                # The 'link' key contains a link to a PDF file associated with that item in the docket report.
+                link = item['link']
+
+                link_dict = {
+                    'number': docNum,
+                    'name': docName,
+                    'link': link,
+                    'exhibit': None,
+                }
+                # Add the found link to the list, which will ultimately be returned at the end of the function.
+                pdf_list.append(link_dict)
+
+            # Some PDF's are inside the exhibits key, which doesnt always exist. Here, we check to see if the exhibits key exists.
+            if 'exhibits' in item:
+
+                # if it does exist, we save its contents in an exhibits variable.
+                exhibits = item['exhibits']
+                
+                # The data contained inside 'exhibits' will be a list of dictionaries. So we loop through the list to access the data.
+                for exhibit in exhibits:
+
+                    # We chck to see if any links exist inside exhibits
+                    if 'link' in exhibit:
+
+                        exhibitNumber = f"{exhibit['exhibit']}"
+
+                        # If a link to a PDF does exist, we store it in a variable.
+                        exhibitLink = exhibit['link']
+                        
+                        exhibit_link_dict = {
+                            'number':docNum,
+                            'name':docName,
+                            'link': exhibitLink,
+                            'exhibit': exhibitNumber,
+                        }
+
+                        pdf_list.append(exhibit_link_dict)
+        return pdf_list
+
 
 def search_docket_alarm(auth_tuple, query_string, limit=10):
     """
@@ -80,5 +142,4 @@ def get_docket(auth_token, docket_number, court_name, client_matter="", cached=T
     }
     result = requests.get(endpoint, params).json()
     return result
-
 
