@@ -14,3 +14,5 @@ PDF_OUTPUT_PATH = os.path.join(CURRENT_DIR, "pdf-output")
 
 # The reason for using the script. Used for billing purposes.
 CLIENT_MATTER = ""
+
+IS_CACHED = True

@@ -49,6 +49,8 @@ def table_to_list_of_tuples():
     # The client matter is the string that the user specified in the main menu.
     CLIENT_MATTER = global_variables.CLIENT_MATTER
 
+    IS_CACHED = global_variables.IS_CACHED
+
     # This list starts out empty, gets a tuple appended to it with every iteration of the loop below, and will eventually
     # be the value returned by this function.
     output_list_of_tuples = []
@@ -70,7 +72,7 @@ def table_to_list_of_tuples():
         caseCourt = row[2]
         # We place the values into a tuple that will serve as parameters for download_json_from_list_of_tuples()
         # when we call it inside the thread_download_json() wrapper.
-        row_tuple = (caseName, caseNo, caseCourt, JSON_INPUT_OUTPUT_PATH, CLIENT_MATTER)
+        row_tuple = (caseName, caseNo, caseCourt, JSON_INPUT_OUTPUT_PATH, CLIENT_MATTER, IS_CACHED)
         # We append each tuple to the list at the top of the function.
         output_list_of_tuples.append(row_tuple)
     # We return the list after it is populated with tuples during each iteration over every row in the spreadsheet.
@@ -92,7 +94,7 @@ def download_json_from_list_of_tuples(result_tuple):
     """
 
     # We unpack the tuple and assign all of it's values to human-readable variable names.
-    caseName, caseNo, caseCourt, JSON_INPUT_OUTPUT_PATH, CLIENT_MATTER = result_tuple
+    caseName, caseNo, caseCourt, JSON_INPUT_OUTPUT_PATH, CLIENT_MATTER, IS_CACHED = result_tuple
 
     user = login.Credentials()
 
@@ -110,7 +112,7 @@ def download_json_from_list_of_tuples(result_tuple):
         # The docket number we want data for
         'docket':caseNo,
         # A boolean representing whether or not we want the cached version of the data.
-        'cached': config.isCached,
+        'cached': IS_CACHED,
         # Cleans up names
         'normalize':True,
     }

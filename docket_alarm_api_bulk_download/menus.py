@@ -191,6 +191,8 @@ def select_paths_menu(pdfOption=True):
         print(f"[3] PDF Files are saved to:\n{os.path.abspath(global_variables.PDF_OUTPUT_PATH)}\n")
     print("To change these paths. Type the number for the path you want to change and press ENTER.\n")
     print(Fore.RED + "[WARNING] A lot of files can be generated in the PDF and JSON directories you choose! Choose carefully!\n" + Style.RESET_ALL)
+    if global_variables.IS_CACHED == False:
+        print(Fore.RED + "[WARNING] You are making an UNCACHED search that may result in extra charges. Restart the program to make a CACHED search.\n" + Style.RESET_ALL)
     print("If you are happy with the current selection, simply press ENTER.\n")
 
     # Prompts the user for a choice and saves it in a variable.
@@ -264,7 +266,9 @@ Type in one of the following numbers and press ENTER to specify your choice:
 
 [2] Log Out of Docket Alarm.
 
-Enter your response below.[0/1/2]
+[3] Uncached Search
+
+Enter your response below.[0/1/2/3]
     """
     print(other_options)
     userChoice = input()
@@ -290,6 +294,28 @@ Enter your response below.[0/1/2]
         else:
             clear()
             other_options_menu()
+    elif userChoice == "3":
+        clear()
+        print("\nUncached searches retrieve more up-to-date results but may result in extra charges.\nWould you like to turn uncached search on?[Y/n]\n")
+        userChoice = input()
+        if userChoice.upper() == "Y":
+            clear()
+            global_variables.IS_CACHED = False
+            print("\nUncached search is ON and will remain ON until the program is closed.")
+            print("\nPress ENTER to return to the menu.")
+            input()
+            welcome()
+        elif userChoice.upper() == "N":
+            clear()
+            other_options_menu()
+        else:
+            print("Invalid choice entered.\nPress ENTER to return to menu.")
+            input()
+            clear()
+            other_options_menu()
+            
+
+            
     else:
         print("Please Enter Valid input (0, 1 or 2)")
 
