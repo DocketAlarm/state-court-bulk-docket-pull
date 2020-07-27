@@ -37,7 +37,7 @@ def browseCSVFiles():
     root.filename = filedialog.askopenfilename(initialdir = FILEBROWSER_CSV_INITIAL_DIR, 
                                           title = "Select a File", 
                                           filetypes = (("Comma Separated Values files", 
-                                                        "*.csv*"), 
+                                                        "*.csv"), 
                                                        ("all files", 
                                                         "*.*")))
 
