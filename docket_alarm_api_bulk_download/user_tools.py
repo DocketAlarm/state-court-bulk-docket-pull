@@ -1,3 +1,7 @@
+import os
+import sys
+file_dir = os.path.dirname(__file__)
+sys.path.append(file_dir)
 import requests
 import pprint
 import pprint
@@ -29,11 +33,34 @@ class Docket:
     def __init__(self, auth_tuple, docket_number, court_name, client_matter="", cached=True, normalize=True):
         auth_token = authenticate(auth_tuple)
         docket = get_docket(auth_token, docket_number, court_name, client_matter, cached, normalize)
-        self.all = docket
-        self.info = docket['info'] if docket['info'] else ""
-        self.docket_report = docket['docket_report'] if docket['docket_report'] else ""
-        self.parties = docket['parties'] if docket['parties'] else ""
-        # self.related = docket['related']
+        if docket['success'] == True:
+            self.all = docket
+            self.info = docket['info']
+            self.docket_report = docket['docket_report']
+            self.parties = docket['parties']
+        else:
+            # If there is no exact result in docket alarm for what the user typed in. We run a docket alarm search to see if
+            # there are similar results. If there is a single match, we get the data the result.
+            # This helps with making the program not so 'sensitive', requiring an input with perfect formatting for docket numbers
+            # and court names.
+            search = search_docket_alarm(auth_tuple, f"is:docket court:({court_name}) docket:({docket_number})")
+            if len(search) == 1:
+                search = search[0]
+                foundDocket = get_docket(auth_token, search['docket'], search['court'], client_matter, cached, normalize)
+                self.all = foundDocket
+                self.info = foundDocket['info']
+                self.docket_report = foundDocket['docket_report']
+                self.parties = foundDocket['parties']
+            else:
+                self.all = None
+                self.info = None
+                self.docket_report = None
+                self.parties = None
+                if len(search) < 1:
+                    raise NameError("Exact match not found. Searched docket alarm for similar dockets. No dockets found.")
+                if len(search) > 1:
+                    raise NameError("Exact match not found. Searched docket alarm for similar dockets. Too many results.")
+
 
     def links(self):
 
@@ -142,4 +169,3 @@ def get_docket(auth_token, docket_number, court_name, client_matter="", cached=T
     }
     result = requests.get(endpoint, params).json()
     return result
-

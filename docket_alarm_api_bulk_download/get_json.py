@@ -17,6 +17,7 @@ import config
 import login, file_browser, global_variables
 import gui #DEV
 import PySimpleGUI as sg
+import user_tools
 
 CURRENT_DIR = os.path.dirname(__file__)
 
@@ -119,28 +120,32 @@ def download_json_from_list_of_tuples(result_tuple):
 
     # Makes the api call. We specify the endpoint and the parameters as arguments. The results of the API call are returned and
     # stored to a variable. 
-    result = requests.get(getdocket_url, data)
+
+
+    # result = requests.get(getdocket_url, data)
 
     
 
     try:
         # if the api call fails, a detailed error is thrown. The script does not stop and the error message is not immediately shown to the user.
-        result.raise_for_status() 
-    except:
+        # result.raise_for_status() 
+        myDocket = user_tools.Docket((user.username, user.password), caseNo, caseCourt, client_matter=CLIENT_MATTER, cached=IS_CACHED, normalize=True)
+        result_json = myDocket.all
+    except Exception as error:
         # Rather, the error is written to log/log.txt with a timestamp and information about which case could not be downloaded.
         result_json = None
-        print(result)
-        print(caseName)
-        print(caseNo)
         timeNow = datetime.datetime.now().strftime("%I:%M%p %B %d, %Y")
         with open(os.path.join(CURRENT_DIR, 'log', 'log.txt'), 'a') as errorlog:
             errorlog.write(f"\n{timeNow}\n")
             errorlog.write("JSON could not be downloaded:\n")
-            errorlog.write(f"{result}: {caseName}, {caseNo}, {caseCourt}\n")
+            errorlog.write(f"{caseName}, {caseNo}, {caseCourt}\n")
+            errorlog.write(f"{error}\n")
             errorlog.write("------------------")
         return
 
-    result_json = result.json()
+    # result_json = result.json()
+
+
     # We use .json() to convert the json results to a python dictionary we can more easily work with.
 
     # If there was a problem with the json data retrieved, and it's been written to the error log, do not write it.
@@ -150,7 +155,7 @@ def download_json_from_list_of_tuples(result_tuple):
         with open(os.path.join(CURRENT_DIR, 'log', 'log.txt'), 'a') as errorlog:
             errorlog.write(f"\n{timeNow}\n")
             errorlog.write("JSON could not be downloaded:\n")
-            errorlog.write(f"{result}: {caseName}, {caseNo}, {caseCourt}\n")
+            errorlog.write(f"{result_json}: {caseName}, {caseNo}, {caseCourt}\n")
             errorlog.write("------------------")
         return
     
