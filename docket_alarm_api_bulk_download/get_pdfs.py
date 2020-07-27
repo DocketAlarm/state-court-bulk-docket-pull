@@ -235,6 +235,7 @@ def download_from_link_list(link_list):
         
             # We write the error to a csv file that will be stored in the log folder when the download finishes.
             tableErrorLog.append_error_table(f"{a}", folderName, fileName)
+            return
 
 
     try:
