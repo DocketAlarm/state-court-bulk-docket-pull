@@ -17,6 +17,7 @@ import config
 import login, file_browser, global_variables
 import gui #DEV
 import PySimpleGUI as sg
+import user_tools
 
 CURRENT_DIR = os.path.dirname(__file__)
 
@@ -49,6 +50,8 @@ def table_to_list_of_tuples():
     # The client matter is the string that the user specified in the main menu.
     CLIENT_MATTER = global_variables.CLIENT_MATTER
 
+    IS_CACHED = global_variables.IS_CACHED
+
     # This list starts out empty, gets a tuple appended to it with every iteration of the loop below, and will eventually
     # be the value returned by this function.
     output_list_of_tuples = []
@@ -70,7 +73,7 @@ def table_to_list_of_tuples():
         caseCourt = row[2]
         # We place the values into a tuple that will serve as parameters for download_json_from_list_of_tuples()
         # when we call it inside the thread_download_json() wrapper.
-        row_tuple = (caseName, caseNo, caseCourt, JSON_INPUT_OUTPUT_PATH, CLIENT_MATTER)
+        row_tuple = (caseName, caseNo, caseCourt, JSON_INPUT_OUTPUT_PATH, CLIENT_MATTER, IS_CACHED)
         # We append each tuple to the list at the top of the function.
         output_list_of_tuples.append(row_tuple)
     # We return the list after it is populated with tuples during each iteration over every row in the spreadsheet.
@@ -92,7 +95,7 @@ def download_json_from_list_of_tuples(result_tuple):
     """
 
     # We unpack the tuple and assign all of it's values to human-readable variable names.
-    caseName, caseNo, caseCourt, JSON_INPUT_OUTPUT_PATH, CLIENT_MATTER = result_tuple
+    caseName, caseNo, caseCourt, JSON_INPUT_OUTPUT_PATH, CLIENT_MATTER, IS_CACHED = result_tuple
 
     user = login.Credentials()
 
@@ -110,37 +113,51 @@ def download_json_from_list_of_tuples(result_tuple):
         # The docket number we want data for
         'docket':caseNo,
         # A boolean representing whether or not we want the cached version of the data.
-        'cached': config.isCached,
+        'cached': IS_CACHED,
         # Cleans up names
         'normalize':True,
     }
 
     # Makes the api call. We specify the endpoint and the parameters as arguments. The results of the API call are returned and
     # stored to a variable. 
-    result = requests.get(getdocket_url, data)
+
+
+    # result = requests.get(getdocket_url, data)
 
     
 
     try:
         # if the api call fails, a detailed error is thrown. The script does not stop and the error message is not immediately shown to the user.
-        result.raise_for_status() 
-    except:
+        # result.raise_for_status() 
+        myDocket = user_tools.Docket((user.username, user.password), caseNo, caseCourt, client_matter=CLIENT_MATTER, cached=IS_CACHED, normalize=True)
+        result_json = myDocket.all
+    except Exception as error:
         # Rather, the error is written to log/log.txt with a timestamp and information about which case could not be downloaded.
         result_json = None
-        print(result)
-        print(caseName)
-        print(caseNo)
         timeNow = datetime.datetime.now().strftime("%I:%M%p %B %d, %Y")
         with open(os.path.join(CURRENT_DIR, 'log', 'log.txt'), 'a') as errorlog:
             errorlog.write(f"\n{timeNow}\n")
             errorlog.write("JSON could not be downloaded:\n")
-            errorlog.write(f"{result}: {caseName}, {caseNo}, {caseCourt}\n")
+            errorlog.write(f"{caseName}, {caseNo}, {caseCourt}\n")
+            errorlog.write(f"{error}\n")
             errorlog.write("------------------")
         return
 
-    result_json = result.json()
+    # result_json = result.json()
+
+
     # We use .json() to convert the json results to a python dictionary we can more easily work with.
 
+    # If there was a problem with the json data retrieved, and it's been written to the error log, do not write it.
+    # Exits the function.
+    if result_json['success'] == False:
+        timeNow = datetime.datetime.now().strftime("%I:%M%p %B %d, %Y")
+        with open(os.path.join(CURRENT_DIR, 'log', 'log.txt'), 'a') as errorlog:
+            errorlog.write(f"\n{timeNow}\n")
+            errorlog.write("JSON could not be downloaded:\n")
+            errorlog.write(f"{result_json}: {caseName}, {caseNo}, {caseCourt}\n")
+            errorlog.write("------------------")
+        return
     
     try:
         # Creates the path where our .json file will be saved to
