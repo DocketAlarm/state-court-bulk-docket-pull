@@ -1,9 +1,15 @@
 <img width=300 src="https://github.com/DocketAlarm/state-court-bulk-docket-pull/blob/master/Docket_Alarm.png?raw=true">
+
 ## Bulk Docket Download
 
-Download court case data and documents in bulk.
-A csv file full of case numbers is taken as input, and this program will automatically download
-all of the files using the Docket Alarm API.
+# State and Federal Court Docket Bulk Download
+
+This application downloads court case data (*i.e.*, dockets) and documents from Federal and State courts in bulk.
+A csv file of docket numbers is taken as input, and this program will automatically download
+all of the files and organize them in appropriate folders on your computer. 
+
+This application uses the [Docket Alarm API](https://www.docketalarm.com/api), 
+and you will need a Docket Alarm license to run it. 
 
 ## Quick Start Guide
 1. Populate a [this CSV template](https://drive.google.com/file/d/1_8i8GEO6GlW1cjtH2afluJXCWyCRP5DG/view?usp=sharing) with the dockets you would like to download. The template has three columns:
