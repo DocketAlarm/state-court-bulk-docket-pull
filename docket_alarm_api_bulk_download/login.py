@@ -6,6 +6,7 @@ sys.path.append(file_dir)
 import pickle
 # Third-party Modules
 import stdiomask
+from retrying import retry
 # Internal Modules
 import requests
 import menus
@@ -55,7 +56,7 @@ class Credentials:
         # by setting the below attributes, we can reference the username by calling credentials_object.username, and so on.
         self.username = credentials_dict['username']
         self.password = credentials_dict['password']
-
+    @retry
     def authenticate(self):
         # """Returns the authentication token to make API calls. Make sure that auth.py is filled out!"""
         # This is the endpoint for logging in to Docket Alarm from the API.
@@ -70,7 +71,7 @@ class Credentials:
 
         # We save the response to a variable. The response is a json object containing
         # our authentication key iside the json key named 'login_token'
-        result = requests.post(login_url, data=data)
+        result = requests.post(login_url, data=data, timeout=60)
 
         result.raise_for_status()
         # Calling the .json() method on the result turns it into a python dictionary we
