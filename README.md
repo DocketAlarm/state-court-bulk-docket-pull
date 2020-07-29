@@ -1,7 +1,5 @@
 <img width=300 src="https://github.com/DocketAlarm/state-court-bulk-docket-pull/blob/master/Docket_Alarm.png?raw=true">
 
-## Bulk Docket Download
-
 # State and Federal Court Docket Bulk Download
 
 This application downloads court case data (*i.e.*, dockets) and documents from Federal and State courts in bulk.
