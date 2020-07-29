@@ -1,5 +1,6 @@
 <img width=300 src="https://github.com/DocketAlarm/state-court-bulk-docket-pull/blob/master/Docket_Alarm.png?raw=true">
 
+## Bulk Docket Download
 
 # State and Federal Court Docket Bulk Download
 
@@ -33,6 +34,52 @@ and you will need a Docket Alarm license to run it.
 - Run ```pip install docket-alarm-api-bulk-download```
 - Run ```docket-alarm-api-bulk-download```
 
+## Using as a Library in your own Programs
+* The user tools allow you to import functionality from this script into your own programs.
+* To start using user tools:
+    ```
+    from docket_alarm_api_bulk_download import user_tools as da
+    
+    or
+    
+    import docket_alarm_api_bulk_download.user_tools as da
+    ```
+* To **search** for Dockets:
+    ```
+    from docket_alarm_api_bulk_download import user_tools as da
+    
+    login_info = ("myUsername@company.com", "secretPassword123#$")
+    
+    mySearch = search_docket_alarm(login_info, "My search query")
+    
+    print(mySearch)
+    ```
+    * The ```search_docket_alarm()``` function takes in 2 arguments, with an extra optional argument.
+        1. A tuple with your username followed by your password as strings.
+        1. Your search query, [just as you would type into Docket Alarm in the search bar on the website.](https://www.docketalarm.com/blog/2014/6/23/Terms-and-Connectors-Searching-With-Docket-Alarm/)
+        1. (Optional) ```limit```, an integer which specefies how many results you want to return.
+    * Your return value will be a list of dictionaries containing your search results. More info [here.](https://www.docketalarm.com/api/v1/#22_Return-Values)
+* Creating **Docket Objects** to access docket data
+    ```
+    import docket_alarm_api_bulk_download.user_tools as da
+    
+    login_info = ("myUsername@company.com", "secretPassword123#$")
+    
+    myDocket = da.Docket()
+    ```
+    * A Docket object is initialized with 3 mandatory arguments and 3 optional arguments:
+        * A tuple with your username followed by your password as strings.
+        * The docket number as a string.
+        * The court name as a string (See court list below).
+        * (Optional) ```client_matter```
+        * (Optional) ```cached```: If set to false, the most recent version of a docket is pulled. This may have additional charges. (default: True)
+        * (Optional) ```normalize``` If set to true, names of parties are normalized. (default: True)
+    * The information within a Docket Object can be accessed with the following methodsL
+        * ```.all```
+        * ```.info```
+        * ```.docket_report```
+        * ```.parties```
+        
 ## Supported Court List
 - Supreme Court of the United States
 - Arkansas State, Supreme Court

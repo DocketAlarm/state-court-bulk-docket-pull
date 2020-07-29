@@ -78,18 +78,13 @@ This program takes in a csv file full of docket numbers and will automatically
 populate 2 folders with the raw JSON data and all of the PDF documents associated
 with that docket.
 
-You will now select the path where your input csv is located.
-Press ENTER to open the file browser.
+Press ENTER to continue.
     """
     print(instructions)
     input()
     clear()
 
-    # Opens a graphical file browser and returns the path to the csv file that the user selected.
-    csvChoice = file_browser.browseCSVFiles()
 
-    # Assigns the choice to a global variable, so other modules can find the path that the user specified.
-    global_variables.CSV_INPUT_PATH = csvChoice
 
     options = """
 Type in one of the following numbers and press ENTER to specify your choice:
@@ -102,7 +97,9 @@ Type in one of the following numbers and press ENTER to specify your choice:
     ( Only select 3 if you already have a directory full of JSON files. )
     ( The JSON files are needed to extract the download links from.     )
 
-[4] More options.
+[4] Search for Dockets
+
+[5] More options.
 
 Enter your response below.[1/2/3/4]
     """
@@ -118,6 +115,14 @@ Enter your response below.[1/2/3/4]
         # Choice 1 is downloading all json and pdf files.
         if userChoice == "1":
             clear()
+            print("\nUpon pressing ENTER, a file browser will open.\nPlease select your input CSV file.")
+            input()
+            # Opens a graphical file browser and returns the path to the csv file that the user selected.
+            csvChoice = file_browser.browseCSVFiles()
+
+            # Assigns the choice to a global variable, so other modules can find the path that the user specified.
+            global_variables.CSV_INPUT_PATH = csvChoice
+            clear()
             menus.select_paths_menu()
             clear()
             menus.specify_client_matter_menu()
@@ -125,6 +130,13 @@ Enter your response below.[1/2/3/4]
             get_json_and_pdfs()
         # Choice 2 is donwloading only JSON files.
         elif userChoice == "2":
+            clear()
+            print("\nUpon pressing ENTER, a file browser will open.\nPlease select your input CSV file.")
+            input()
+            # Opens a graphical file browser and returns the path to the csv file that the user selected.
+            csvChoice = file_browser.browseCSVFiles()
+            # Assigns the choice to a global variable, so other modules can find the path that the user specified.
+            global_variables.CSV_INPUT_PATH = csvChoice
             clear()
             menus.select_paths_menu(pdfOption=False)
             menus.specify_client_matter_menu()
@@ -137,10 +149,10 @@ Enter your response below.[1/2/3/4]
             menus.specify_client_matter_menu()
             print(msg)
             link_list = get_pdfs.get_urls("json-output")
-
-            # get_pdfs.multiprocess_download_pdfs(link_list)
             get_pdfs.thread_download_pdfs(link_list)
         elif userChoice == "4":
+            spreadsheet_generator_menu()
+        elif userChoice == "5":
             clear()
             menus.other_options_menu()
 
@@ -313,11 +325,10 @@ Enter your response below.[0/1/2/3]
             input()
             clear()
             other_options_menu()
-            
 
             
     else:
-        print("Please Enter Valid input (0, 1 or 2)")
+        print("Please Enter Valid input (0, 1, 2, or 3)")
 
 def specify_client_matter_menu():
     clear()
@@ -326,4 +337,98 @@ def specify_client_matter_menu():
     global_variables.CLIENT_MATTER = user_input
     clear()
     return
+
+
+msg2 = """
+______           _        _      ___  _                         ___  ______ _____ 
+|  _  \         | |      | |    / _ \| |                       / _ \ | ___ \_   _|
+| | | |___   ___| | _____| |_  / /_\ \ | __ _ _ __ _ __ ___   / /_\ \| |_/ / | |  
+| | | / _ \ / __| |/ / _ \ __| |  _  | |/ _` | '__| '_ ` _ \  |  _  ||  __/  | |  
+| |/ / (_) | (__|   <  __/ |_  | | | | | (_| | |  | | | | | | | | | || |    _| |_ 
+|___/ \___/ \___|_|\_\___|\__| \_| |_/_|\__,_|_|  |_| |_| |_| \_| |_/\_|    \___/ 
+                                                                                  
+                                                                                  
+ _____  _____  _   _   _____                           _                          
+/  __ \/  ___|| | | | |  __ \                         | |                         
+| /  \/\ `--. | | | | | |  \/ ___ _ __   ___ _ __ __ _| |_ ___  _ __              
+| |     `--. \| | | | | | __ / _ \ '_ \ / _ \ '__/ _` | __/ _ \| '__|             
+| \__/\/\__/ /\ \_/ / | |_\ \  __/ | | |  __/ | | (_| | || (_) | |                
+ \____/\____/  \___/   \____/\___|_| |_|\___|_|  \__,_|\__\___/|_|                
+                                                                                  
+"""
+
+
+def spreadsheet_generator_menu():
+    import generate_spreadsheets
+    clear()
+
+
+    csv_generator_instructions = """
+Instructions:
+
+Make a Docket Alarm search query and 4 spreadsheets will be generated containing data from all of the returned results.
+You will browse for an output folder to save your spreadsheets to.
+These are not the same format as the spreadsheets used as input for downloading PDFs and JSON.
+
+Press ENTER to continue.
+    """
+
+    sort_results_msg = """
+
+How would you like to sort your results?
+
+[1] Search by relevancce, which considers matching keywords, court level, and recentness.
+
+[2] Oldest first by docket/document filing date.
+
+[3] Newest first by docket/document filing date.
+
+[4] Order dockets by the date of the most recent entry listed on the docket ascending.
+
+[5] Order dockets by the date of the most recent entry listed on the docket descending.
+
+[6] Random order. (good for sampling)
+
+Enter your choice below. [1/2/3/4/5/6]
+
+"""
+    print(Fore.RED + msg2)
+    print("\nPress ENTER to begin" + Style.RESET_ALL)
+    input()
+    clear()
+    print(csv_generator_instructions)
+    input()
+    clear()
+    print("\nEnter a Docket Alarm search query.\n")
+    print("(This is the same query that you would enter on docketalarm.com.\nFull search documentation can be found at https://www.docketalarm.com/posts/2014/6/23/Terms-and-Connectors-Searching-With-Docket-Alarm/)\n\n")
+    users_search_query = input()
+    clear()
+    print("\nEnter the number of results you want to return (Max 50)\n\n")
+    users_number_of_results = int(input())
+    clear()
+    print(sort_results_msg)
+    sort_choice_input = input()
+    if sort_choice_input == "1":
+        sort_choice = None
+    elif sort_choice_input == "2":
+        sort_choice = "date_filed"
+    elif sort_choice_input == "3":
+        sort_choice = "-date_filed"
+    elif sort_choice_input == "4":
+        sort_choice = "date_last_filing"
+    elif sort_choice_input == "5":
+        sort_choice = "-date_last_filing"
+    elif sort_choice_input == "6":
+        sort_choice = "random"
+    else:
+        print("Invalid choice. Press ENTER to return to menu.")
+        input()
+        spreadsheet_generator_menu()
+
+
+    clear()
+    print("\nUpon pressing ENTER, a file browser will open. Please browse to the directory where you\nwould like to save your output folder.")
+    input()
+    users_output_path = file_browser.browseDirectories("csv-output")
+    generate_spreadsheets.query_to_tables(users_search_query, users_number_of_results, users_output_path, result_order=sort_choice)
 

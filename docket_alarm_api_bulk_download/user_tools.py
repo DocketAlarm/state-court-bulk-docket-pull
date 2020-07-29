@@ -8,9 +8,13 @@ import pprint
 import re
 import json
 import get_pdfs
-# Experimental feature.
+from retrying import retry
+
+
 # End user will be able to import this module and create instances of the Docket class to work with the DA API
 # without needing to know how to work with APIs
+
+# The class and functions here are also used by the command line program to do the bulk downloads.
 
 class Docket:
     """
@@ -30,6 +34,7 @@ class Docket:
     and Docket.related.
     Each returns a dictionary with information about the docket.
     """
+
     def __init__(self, auth_tuple, docket_number, court_name, client_matter="", cached=True, normalize=True):
         auth_token = authenticate(auth_tuple)
         docket = get_docket(auth_token, docket_number, court_name, client_matter, cached, normalize)
@@ -120,8 +125,8 @@ class Docket:
                         pdf_list.append(exhibit_link_dict)
         return pdf_list
 
-
-def search_docket_alarm(auth_tuple, query_string, limit=10):
+@retry
+def search_docket_alarm(auth_tuple, query_string, limit=10, result_order=None):
     """
     Args:
     auth tuple - a tuple containing the username, followed by the password.
@@ -130,16 +135,25 @@ def search_docket_alarm(auth_tuple, query_string, limit=10):
     """
     limit = str(limit)
     endpoint = "https://www.docketalarm.com/api/v1/search/"
-    parameters = {
+
+    if result_order != None:
+        parameters = {
+            "login_token": authenticate(auth_tuple),
+            "q": query_string,
+            "o": result_order,
+            "limit": limit,
+        }
+    else:
+        parameters = {
         "login_token": authenticate(auth_tuple),
         "q": query_string,
         "limit": limit,
-    }
-    result = requests.get(endpoint, params=parameters).json()
+        }
+    result = requests.get(endpoint, params=parameters,timeout=60).json()
     search_results = result['search_results']
     return search_results
 
-
+@retry
 def authenticate(auth_tuple):
     """
     Takes in a username, followed by a password in a tuple as an argument.
@@ -151,12 +165,13 @@ def authenticate(auth_tuple):
         'username': username,
         'password': password,
         }
-    result = requests.post(login_url, data=data)
+    result = requests.post(login_url, data=data, timeout=60)
     result.raise_for_status()
     result_json = result.json()
     login_token = result_json['login_token']
     return login_token
 
+@retry
 def get_docket(auth_token, docket_number, court_name, client_matter="", cached=True, normalize=True):
     endpoint = "https://www.docketalarm.com/api/v1/getdocket/"
     params = {
@@ -167,5 +182,5 @@ def get_docket(auth_token, docket_number, court_name, client_matter="", cached=T
         'cached':cached,
         'normalize':normalize,
     }
-    result = requests.get(endpoint, params).json()
+    result = requests.get(endpoint, params, timeout=60).json()
     return result
