@@ -13,6 +13,7 @@ import global_variables
 import menus
 from get_pdfs import cleanhtml
 
+
 # We store the directory of this file in a variable so we can access it as needed.
 CURRENT_DIR = os.path.dirname(__file__)
 
@@ -42,6 +43,7 @@ def removehtml(html_string):
     # We return the string with the HTML tags removed.
     return html_removed
 
+
 def query_to_tables(query, results_limit, output_path, result_order=None):
     """
     Takes in a search query as a sting,
@@ -61,7 +63,8 @@ def query_to_tables(query, results_limit, output_path, result_order=None):
         """
         This nested function populates the docketInformation dataframe.
         """
-
+        if not 'info' in docket:
+            return
         # We loop through all the keys present in the dockets info dictionary.
         for key in docket['info']:
             
@@ -92,6 +95,10 @@ def query_to_tables(query, results_limit, output_path, result_order=None):
         """
 
         # We loop through each dictionary within the docket_report list
+        if not 'docket_report' in docket:
+            print(docket)
+            return
+
         for document in docket['docket_report']:
 
             # We create the new row we want to add as a dictionary.
@@ -124,6 +131,7 @@ def query_to_tables(query, results_limit, output_path, result_order=None):
         # The parties key is not always present in our response.
         if not 'parties' in docket:
             # If it's not present, we don't add to the dataframe and we exit the function.
+            print(docket)
             return
 
         for party in docket.get('parties', None):
@@ -192,13 +200,20 @@ def query_to_tables(query, results_limit, output_path, result_order=None):
     # After defining all of our nested functions, this is where the query_to_tables() function begins.
 
     # First we let the user know to wait, so they don't press any buttons that get entered as the input they will be prompted for when this is done loading.
-    print("\nQuerying, please wait...\n")
+    print("\n")
 
     # We create our user object to log in. We can use attributes and methods to access the username, password, and authentication token of our currently signed in user.
     user = login.Credentials()
 
+
+    print("Querying, please wait...")
+
     # We run our search, using the query, the number of results, and the order that the user specified in the menu.
     searchResults = user_tools.search_docket_alarm((user.username,user.password),query,limit=results_limit, result_order=result_order)
+
+    searchResults = searchResults[0:results_limit]
+
+    
 
     # We let the user know how many results were returned for their search and ask them to confirm to proceed.
     print(f"\nThis search query resulted in {len(searchResults)} results. Proceed? [Y/n]")

@@ -1,7 +1,11 @@
 import requests
 import get_json
+import login
 
 def search_direct(docketnum, court):
+
+    user = login.Credentials()
+
     """ Takes in the name of a party and the docket number as a parameter,
         returns the Docket Alarm search results. You can make calls to the
         /getdocket endpoint with these results to get more detailed information
@@ -10,7 +14,7 @@ def search_direct(docketnum, court):
     searchdirect_url = "https://www.docketalarm.com/api/v1/searchdirect/"
 
     data = {
-        'login_token':get_json.authenticate(),
+        'login_token': user.authenticate(),
         'client_matter':"",
         # 'party_name':party_name,
         'docketnum':docketnum,
@@ -26,10 +30,13 @@ def search_direct(docketnum, court):
     return result_json
 
 def search_pacer(docketnum, court):
+
+    user = login.Credentials()
+
     url = "https://www.docketalarm.com/api/v1/searchpacer/"
 
     data = {
-        'login_token':get_json.authenticate(),
+        'login_token':user.authenticate(),
         'client_matter':"",
         # 'party_name':party_name,
         'docket_num':docketnum,
