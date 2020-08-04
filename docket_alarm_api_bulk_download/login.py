@@ -56,6 +56,7 @@ class Credentials:
         # by setting the below attributes, we can reference the username by calling credentials_object.username, and so on.
         self.username = credentials_dict['username']
         self.password = credentials_dict['password']
+        
     @retry
     def authenticate(self):
         # """Returns the authentication token to make API calls. Make sure that auth.py is filled out!"""

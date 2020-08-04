@@ -5,10 +5,12 @@ file_dir = os.path.dirname(__file__)
 sys.path.append(file_dir)
 # Third-party Modules
 from colorama import init, Fore, Back, Style
+import requests
 # Internal Modules
 import get_json, get_pdfs, login, menus, file_browser, global_variables, fetch_updated_court_list
 import config
 import gui
+import user_tools
 
 # Inititalizes Colorama functionality, allowing us to write text to the terminal in different colors.
 init()
@@ -403,8 +405,14 @@ Enter your choice below. [1/2/3/4/5/6]
     print("(This is the same query that you would enter on docketalarm.com.\nFull search documentation can be found at https://www.docketalarm.com/posts/2014/6/23/Terms-and-Connectors-Searching-With-Docket-Alarm/)\n\n")
     users_search_query = input()
     clear()
-    print("\nEnter the number of results you want to return (Max 50)\n\n")
+    print("Calculating maximum number of results, please wait...")
+    user = login.Credentials()
+    amountOfResults = requests.get("https://www.docketalarm.com/api/v1/search/", params={"login_token": user.authenticate(),"q": users_search_query, "limit": "1"},timeout=60).json()['count']
+    clear()
+    print(f"Maximum number of results: {amountOfResults}")
+    print("\nEnter the number of results you want to return\n\n")
     users_number_of_results = int(input())
+
     clear()
     print(sort_results_msg)
     sort_choice_input = input()
