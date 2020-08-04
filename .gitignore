@@ -15,6 +15,7 @@
 !/docket_alarm_api_bulk_download/csv/input.example.csv
 
 
+# Output files
 
 /docket_alarm_api_bulk_download/log/*
 !/docket_alarm_api_bulk_download/log/.gitkeep
@@ -28,6 +29,14 @@
 /docket_alarm_api_bulk_download/sav/*
 !/docket_alarm_api_bulk_download/sav/.gitkeep
 
+/docket_alarm_api_bulk_download/csv-output/*
+!/docket_alarm_api_bulk_download/csv-ouput/.gitkeep
+
 
 # Virtual environment
 /venv/
+
+
+# Publishing Distribution Files
+/setup.py
+MANIFEST.in

@@ -3,8 +3,10 @@ import tkinter
 from tkinter import filedialog 
 import os
 
+# The directory this file is in
 CURRENT_DIR = os.path.dirname(__file__)
 
+# The directory we want the file browser to start in when searching for a csv file.
 FILEBROWSER_CSV_INITIAL_DIR = os.path.join(CURRENT_DIR, 'csv')
 
 def browseCSVFiles():
@@ -35,7 +37,7 @@ def browseCSVFiles():
     root.filename = filedialog.askopenfilename(initialdir = FILEBROWSER_CSV_INITIAL_DIR, 
                                           title = "Select a File", 
                                           filetypes = (("Comma Separated Values files", 
-                                                        "*.csv*"), 
+                                                        "*.csv"), 
                                                        ("all files", 
                                                         "*.*")))
 
