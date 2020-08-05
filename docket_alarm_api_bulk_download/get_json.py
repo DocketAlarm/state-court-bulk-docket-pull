@@ -18,6 +18,7 @@ import login, file_browser, global_variables
 import gui #DEV
 import PySimpleGUI as sg
 import user_tools
+import get_pdfs
 
 CURRENT_DIR = os.path.dirname(__file__)
 
@@ -150,7 +151,7 @@ def download_json_from_list_of_tuples(result_tuple):
 
     # If there was a problem with the json data retrieved, and it's been written to the error log, do not write it.
     # Exits the function.
-    if result_json['success'] == False:
+    if result_json.get('success', False) == False:
         timeNow = datetime.datetime.now().strftime("%I:%M%p %B %d, %Y")
         with open(os.path.join(CURRENT_DIR, 'log', 'log.txt'), 'a') as errorlog:
             errorlog.write(f"\n{timeNow}\n")
@@ -161,7 +162,7 @@ def download_json_from_list_of_tuples(result_tuple):
     
     try:
         # Creates the path where our .json file will be saved to
-        filePathNameWExt = os.path.join(JSON_INPUT_OUTPUT_PATH, f"{caseName} {caseNo}" + '.json')
+        filePathNameWExt = os.path.join(JSON_INPUT_OUTPUT_PATH, f"{get_pdfs.cleanhtml(caseName)} {get_pdfs.cleanhtml(caseNo)}" + '.json')
 
 
         # We use a lock so this code won't be executed by multiple threads simultaneously, this way we don't get errors.
