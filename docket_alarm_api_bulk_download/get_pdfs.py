@@ -123,24 +123,24 @@ def get_urls(input_directory):
             if "docket_report" in jsonObject:
 
                 # If it exists, it saves the value for the docket_report key in a variable.
-                docket_report = jsonObject['docket_report']
+                docket_report = jsonObject.get('docket_report', None)
 
                 # docket_report will be a list of dictionaries. This loops through each dictionary in the list.
                 for item in docket_report:
                     
-                    docName = item['contents']
+                    docName = item.get('contents', None)
 
                     # We run the cleanhtml() function on the document name to remove the HTML tags and acharcters that can't be used in filenames
                     docName = cleanhtml(docName)
 
                     # The ID number of the document. We use this later for the file names
-                    docNum = item['number']
+                    docNum = item.get('number', "Doc")
 
                     # Checks to see if any of the dictionaries inside the list contain a 'link' key
                     if 'link' in item:
 
                         # The 'link' key contains a link to a PDF file associated with that item in the docket report.
-                        link = item['link']
+                        link = item.get('link', None)
 
                         link_filename = f"{docNum} - {docName}"
 
@@ -152,7 +152,7 @@ def get_urls(input_directory):
                     if 'exhibits' in item:
 
                         # if it does exist, we save its contents in an exhibits variable.
-                        exhibits = item['exhibits']
+                        exhibits = item.get('exhibits', None)
                         
                         # The data contained inside 'exhibits' will be a list of dictionaries. So we loop through the list to access the data.
                         for exhibit in exhibits:
@@ -160,10 +160,10 @@ def get_urls(input_directory):
                             # We chck to see if any links exist inside exhibits
                             if 'link' in exhibit:
 
-                                exhibitNumber = f"{exhibit['exhibit']}"
+                                exhibitNumber = f"{exhibit.get('exhibit', None)}"
 
                                 # If a link to a PDF does exist, we store it in a variable.
-                                exhibitLink = exhibit['link']
+                                exhibitLink = exhibit.get('link', None)
                                 
                                 # We create a file name to save the exhibit pdf as
                                 exhibitName = f"Exhibit {exhibitNumber} - {docNum} - {docName}"
@@ -199,7 +199,7 @@ def download_from_link_list(link_list):
     # The directory where we will create the subdirectories within for each individual docket
     outputDirectoryPath = os.path.join(outputPath, folderName)
     # The path we are saving the file to, inside the subdirectory we will create.
-    outputFilePath = os.path.join(outputDirectoryPath, f"{fileName}.pdf")
+    outputFilePath = os.path.join(outputDirectoryPath, f"{cleanhtml(fileName)}.pdf")
     
     # We open a lock so threads can't run this block of code simultaneously since that would cause errors
     with lock: 
