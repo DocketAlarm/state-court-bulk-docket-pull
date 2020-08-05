@@ -368,12 +368,22 @@ def spreadsheet_generator_menu():
     csv_generator_instructions = """
 Instructions:
 
-Make a Docket Alarm search query and 4 spreadsheets will be generated containing data from all of the returned results.
+Make a Docket Alarm search query or import a csv full of case numbers and 4 spreadsheets will be generated containing data from all of the returned results.
 You will browse for an output folder to save your spreadsheets to.
 These are not the same format as the spreadsheets used as input for downloading PDFs and JSON.
 
 Press ENTER to continue.
     """
+
+    input_preference_msg = """
+How would you like to select your cases?
+
+[1] Docket Alarm search query
+
+[2] Input CSV
+
+Enter your choice [1/2], and press ENTER to continue.
+"""
 
     sort_results_msg = """
 
@@ -399,44 +409,60 @@ Enter your choice below. [1/2/3/4/5/6]
     input()
     clear()
     print(csv_generator_instructions)
-    input()
-    clear()
-    print("\nEnter a Docket Alarm search query.\n")
-    print("(This is the same query that you would enter on docketalarm.com.\nFull search documentation can be found at https://www.docketalarm.com/posts/2014/6/23/Terms-and-Connectors-Searching-With-Docket-Alarm/)\n\n")
-    users_search_query = input()
-    clear()
-    print("Calculating maximum number of results, please wait...")
-    user = login.Credentials()
-    amountOfResults = requests.get("https://www.docketalarm.com/api/v1/search/", params={"login_token": user.authenticate(),"q": users_search_query, "limit": "1"},timeout=60).json()['count']
-    clear()
-    print(f"Maximum number of results: {amountOfResults}")
-    print("\nEnter the number of results you want to return\n\n")
-    users_number_of_results = int(input())
 
-    clear()
-    print(sort_results_msg)
-    sort_choice_input = input()
-    if sort_choice_input == "1":
-        sort_choice = None
-    elif sort_choice_input == "2":
-        sort_choice = "date_filed"
-    elif sort_choice_input == "3":
-        sort_choice = "-date_filed"
-    elif sort_choice_input == "4":
-        sort_choice = "date_last_filing"
-    elif sort_choice_input == "5":
-        sort_choice = "-date_last_filing"
-    elif sort_choice_input == "6":
-        sort_choice = "random"
-    else:
-        print("Invalid choice. Press ENTER to return to menu.")
+    print(input_preference_msg)
+    input_preference_choice = input()
+
+    if input_preference_choice == "1":
+        clear()
+        print("\nEnter a Docket Alarm search query.\n")
+        print("(This is the same query that you would enter on docketalarm.com.\nFull search documentation can be found at https://www.docketalarm.com/posts/2014/6/23/Terms-and-Connectors-Searching-With-Docket-Alarm/)\n\n")
+        users_search_query = input()
+        clear()
+        print("Calculating maximum number of results, please wait...")
+        user = login.Credentials()
+        amountOfResults = requests.get("https://www.docketalarm.com/api/v1/search/", params={"login_token": user.authenticate(),"q": users_search_query, "limit": "1"},timeout=60).json()['count']
+        clear()
+        print(f"Maximum number of results: {amountOfResults}")
+        print("\nEnter the number of results you want to return\n\n")
+        users_number_of_results = int(input())
+        clear()
+        print(sort_results_msg)
+        sort_choice_input = input()
+        if sort_choice_input == "1":
+            sort_choice = None
+        elif sort_choice_input == "2":
+            sort_choice = "date_filed"
+        elif sort_choice_input == "3":
+            sort_choice = "-date_filed"
+        elif sort_choice_input == "4":
+            sort_choice = "date_last_filing"
+        elif sort_choice_input == "5":
+            sort_choice = "-date_last_filing"
+        elif sort_choice_input == "6":
+            sort_choice = "random"
+        else:
+            print("Invalid choice. Press ENTER to return to menu.")
+            input()
+            spreadsheet_generator_menu()
+    elif input_preference_choice == "2":
+        clear()
+        print("Please browse to the CSV file you will use as input. Press ENTER to open file browser.")
         input()
-        spreadsheet_generator_menu()
+        input_csv = file_browser.browseCSVFiles()
+
+
+
 
 
     clear()
     print("\nUpon pressing ENTER, a file browser will open. Please browse to the directory where you\nwould like to save your output folder.")
     input()
     users_output_path = file_browser.browseDirectories("csv-output")
-    generate_spreadsheets.query_to_tables(users_search_query, users_number_of_results, users_output_path, result_order=sort_choice)
+
+    if input_preference_choice == "1":
+        generate_spreadsheets.query_to_tables(users_search_query, users_number_of_results, users_output_path, result_order=sort_choice)
+    
+    elif input_preference_choice == "2":
+        generate_spreadsheets.query_to_tables("", "", users_output_path, input_csv=input_csv)
 

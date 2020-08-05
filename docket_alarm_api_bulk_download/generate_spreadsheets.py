@@ -44,7 +44,7 @@ def removehtml(html_string):
     return html_removed
 
 
-def query_to_tables(query, results_limit, output_path, result_order=None):
+def query_to_tables(query, results_limit, output_path, result_order=None, input_csv=None):
     """
     Takes in a search query as a sting,
     the amount of results you want returned as a string,
@@ -56,8 +56,12 @@ def query_to_tables(query, results_limit, output_path, result_order=None):
     from your search.
     """
 
+
+
+
     # We convert the amount of results the user wants to an integer so we can work with the number.
-    results_limit = int(results_limit)
+    if input_csv == None:
+        results_limit = int(results_limit)
 
     def fill_docketInformation(result,docket):
         """
@@ -196,22 +200,67 @@ def query_to_tables(query, results_limit, output_path, result_order=None):
                 # When we append a dataframe, the original is not changed, rather a new version of the dataframe with the added row is generated.
                 # We replace the original with the new version so our changes get saved.
                 attorneysAndFirms = appender
+    
+    if input_csv != None:
+        # The path to the input spreadsheet is the path that the user specified in the main menu.
 
-    # After defining all of our nested functions, this is where the query_to_tables() function begins.
+        # The path where the JSON files will be downloaded to is the path that the user specified in the main menu.
+        JSON_INPUT_OUTPUT_PATH = global_variables.JSON_INPUT_OUTPUT_PATH
 
-    # First we let the user know to wait, so they don't press any buttons that get entered as the input they will be prompted for when this is done loading.
-    print("\n")
+        # The client matter is the string that the user specified in the main menu.
+        CLIENT_MATTER = global_variables.CLIENT_MATTER
 
-    # We create our user object to log in. We can use attributes and methods to access the username, password, and authentication token of our currently signed in user.
-    user = login.Credentials()
+        IS_CACHED = global_variables.IS_CACHED
+
+        # This list starts out empty, gets a tuple appended to it with every iteration of the loop below, and will eventually
+        # be the value returned by this function.
+        output_list_of_tuples = []
+
+        try:
+            # We try to open the csv as a pandas dataframe. Pandas dataframes make working with tabular data in python faster and easier.
+            df = pd.read_csv(input_csv)
+
+        except Exception as e:
+            # If there are any errors with opening the dataframe, we print the data to the console to alert the user.
+            print(f"{e}")
+            input()
+        
+        searchResults = []
+        # We loop through every row of the input spreadsheet, the row value allows us to access each value in each row through indexing.
+        searching_from_csv_bar = Bar("Reading CSV, Querying Docket Alarm...", max=df.shape[0])
+        for index, row in df.iterrows():
+            # We use indexing to store each value in the appropriate variables so they are more human-readable.
+            caseName = row[0]
+            caseNo = row[1]
+            caseCourt = row[2]
+            # We place the values into a tuple that will serve as parameters for download_json_from_list_of_tuples()
+            # when we call it inside the thread_download_json() wrapper.
+
+            query = f"is:docket court:({caseCourt}) docket:({caseNo})"
+            user = login.Credentials()
+            searchResult = user_tools.search_docket_alarm((user.username,user.password),query,limit=1, result_order=result_order)
+            searchResults += searchResult
+            searching_from_csv_bar.next()
+        searching_from_csv_bar.finish()
+
+    else:
 
 
-    print("Querying, please wait...")
+        # After defining all of our nested functions, this is where the query_to_tables() function begins.
 
-    # We run our search, using the query, the number of results, and the order that the user specified in the menu.
-    searchResults = user_tools.search_docket_alarm((user.username,user.password),query,limit=results_limit, result_order=result_order)
+        # First we let the user know to wait, so they don't press any buttons that get entered as the input they will be prompted for when this is done loading.
+        print("\n")
+        print("Querying, please wait...")
+        # We create our user object to log in. We can use attributes and methods to access the username, password, and authentication token of our currently signed in user.
+        user = login.Credentials()
 
-    searchResults = searchResults[0:results_limit]
+
+        
+
+        # We run our search, using the query, the number of results, and the order that the user specified in the menu.
+        searchResults = user_tools.search_docket_alarm((user.username,user.password),query,limit=results_limit, result_order=result_order)
+
+        searchResults = searchResults[0:results_limit]
 
     
 
@@ -272,7 +321,10 @@ def query_to_tables(query, results_limit, output_path, result_order=None):
     # The complete name of the folder will be the search entered, followed by the current time.
     # We use the cleanhtml function to remove any characters that are not allowed in file or folder names.
     # cleanhtml() is imported from get_pdfs.py.
-    containing_folder_name = f"{cleanhtml(query)} - {timeNow}"
+    if input_csv == None:
+        containing_folder_name = f"{cleanhtml(query)} - {timeNow}"
+    else:
+        containing_folder_name = f"{timeNow}"
 
     # We put together the absolute path to the folder we want to create and populate it.
     output_directory = os.path.join(output_path, containing_folder_name)
