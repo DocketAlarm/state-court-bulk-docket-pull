@@ -1,6 +1,23 @@
 #!/usr/bin/env python3
 import os
 import sys
+
+if sys.version_info[0] < 3:
+    print("""
+----------------------------------------------------------
+----                 Problem Running                  ----
+
+This application must be run with Python 3. You are 
+currently using version: 
+
+%s
+
+Install Python 3 from their website and re-run. 
+   https://www.python.org/downloads/
+----------------------------------------------------------
+"""%sys.version)
+    exit()
+
 file_dir = os.path.dirname(__file__)
 sys.path.append(file_dir)
 import menus
