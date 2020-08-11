@@ -6,6 +6,7 @@ sys.path.append(file_dir)
 # Third-party Modules
 from colorama import init, Fore, Back, Style
 import requests
+import os
 # Internal Modules
 import get_json, get_pdfs, login, menus, file_browser, global_variables, fetch_updated_court_list
 import config
@@ -91,15 +92,16 @@ Press ENTER to continue.
     options = """
 Type in one of the following numbers and press ENTER to specify your choice:
 
-[1] Get all JSON files and PDF files.
+[1/blank] Search for dockets.
+    Used by the following programs. 
 
-[2] Get JSON files only.
+[2] Get all docket JSON files and PDF files.
 
-[3] Get PDF files only.
-    ( Only select 3 if you already have a directory full of JSON files. )
-    ( The JSON files are needed to extract the download links from.     )
+[3] Get all docket JSON files only.
 
-[4] Search for Dockets
+[4] Get PDF files only.
+    Only select 3 if you already have a directory full of JSON files.
+    The JSON files are needed to extract the download links from.
 
 [5] More options.
 
@@ -114,8 +116,10 @@ Enter your response below.[1/2/3/4]
         """
         userChoice = input()
 
-        # Choice 1 is downloading all json and pdf files.
-        if userChoice == "1":
+        if userChoice == "1" or not userChoice:
+            spreadsheet_generator_menu()
+        elif userChoice == "2":
+            # Choice 1 is downloading all json and pdf files.
             clear()
             print("\nUpon pressing ENTER, a file browser will open.\nPlease select your input CSV file.")
             input()
@@ -131,7 +135,7 @@ Enter your response below.[1/2/3/4]
             print(msg)
             get_json_and_pdfs()
         # Choice 2 is donwloading only JSON files.
-        elif userChoice == "2":
+        elif userChoice == "3":
             clear()
             print("\nUpon pressing ENTER, a file browser will open.\nPlease select your input CSV file.")
             input()
@@ -145,15 +149,13 @@ Enter your response below.[1/2/3/4]
             print(msg)
             get_json.thread_download_json()
         # Choice 3 is downloading only PDF files.
-        elif userChoice == "3":
+        elif userChoice == "4":
             clear()
             menus.select_paths_menu()
             menus.specify_client_matter_menu()
             print(msg)
             link_list = get_pdfs.get_urls("json-output")
             get_pdfs.thread_download_pdfs(link_list)
-        elif userChoice == "4":
-            spreadsheet_generator_menu()
         elif userChoice == "5":
             clear()
             menus.other_options_menu()
@@ -378,7 +380,7 @@ Press ENTER to continue.
     input_preference_msg = """
 How would you like to select your cases?
 
-[1] Docket Alarm search query
+[1/blank] Docket Alarm search query
 
 [2] Input CSV
 
@@ -389,7 +391,7 @@ Enter your choice [1/2], and press ENTER to continue.
 
 How would you like to sort your results?
 
-[1] Search by relevancce, which considers matching keywords, court level, and recentness.
+[1/blank] Search by relevance, which considers matching keywords, court level, and recentness.
 
 [2] Oldest first by docket/document filing date.
 
@@ -401,7 +403,7 @@ How would you like to sort your results?
 
 [6] Random order. (good for sampling)
 
-Enter your choice below. [1/2/3/4/5/6]
+Enter your choice below. [1/2/3/4/5/6] [blank=1]
 
 """
     print(Fore.RED + msg2)
@@ -413,7 +415,7 @@ Enter your choice below. [1/2/3/4/5/6]
     print(input_preference_msg)
     input_preference_choice = input()
 
-    if input_preference_choice == "1":
+    if input_preference_choice == "1" or not input_preference_choice:
         clear()
         print("\nEnter a Docket Alarm search query.\n")
         print("(This is the same query that you would enter on docketalarm.com.\nFull search documentation can be found at https://www.docketalarm.com/posts/2014/6/23/Terms-and-Connectors-Searching-With-Docket-Alarm/)\n\n")
@@ -424,12 +426,13 @@ Enter your choice below. [1/2/3/4/5/6]
         amountOfResults = requests.get("https://www.docketalarm.com/api/v1/search/", params={"login_token": user.authenticate(),"q": users_search_query, "limit": "1"},timeout=60).json()['count']
         clear()
         print(f"Maximum number of results: {amountOfResults}")
-        print("\nEnter the number of results you want to return\n\n")
-        users_number_of_results = int(input())
+        print("\nEnter the number of results you want to return (or blank for all)\n\n")
+        result = input()
+        users_number_of_results = int(result) if result.strip() else amountOfResults
         clear()
         print(sort_results_msg)
         sort_choice_input = input()
-        if sort_choice_input == "1":
+        if sort_choice_input == "1" or not sort_choice_input.strip():
             sort_choice = None
         elif sort_choice_input == "2":
             sort_choice = "date_filed"
@@ -456,11 +459,27 @@ Enter your choice below. [1/2/3/4/5/6]
 
 
     clear()
-    print("\nUpon pressing ENTER, a file browser will open. Please browse to the directory where you\nwould like to save your output folder.")
-    input()
-    users_output_path = file_browser.browseDirectories("csv-output")
 
-    if input_preference_choice == "1":
+
+    default_dir = os.path.join(file_dir, 'data')
+    try:
+        os.mkdir(default_dir)
+    except:
+        pass
+    print("""
+Select which directory you would like to save the data:
+
+[1] Default folder:
+    %s
+
+[2] Use a file browser to select the directory."""%default_dir)
+    response = input()
+    if not response or response == '1':
+        users_output_path = default_dir
+    else:
+        users_output_path = file_browser.browseDirectories("csv-output")
+
+    if input_preference_choice == "1" or not input_preference_choice:
         generate_spreadsheets.query_to_tables(users_search_query, users_number_of_results, users_output_path, result_order=sort_choice)
     
     elif input_preference_choice == "2":

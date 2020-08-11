@@ -151,7 +151,116 @@ class Docket:
                         pdf_list.append(exhibit_link_dict)
         return pdf_list
 
-@retry
+
+def map_parallel(f, iter, max_parallel=10, _enforce_parallel=False):
+    """Just like map(f, iter) but each is done in a separate thread.
+
+    If an Exception is raised during one of the map calls, then we stop
+    processing additional items, and re-raise the Exception. If multiple
+    exceptions occur simultaneously, we the first item in the list appears in
+    the list (not necessarily the first item that raised the Exception).
+    """
+    # Put all of the items in the queue, keep track of order.
+    import six.moves.queue
+    import logging, threading, traceback
+    total_items = 0
+    queue = six.moves.queue.Queue()
+    for i, arg in enumerate(iter):
+        queue.put((i, arg))
+        total_items += 1
+    # No point in creating more thread objects than necessary.
+    if max_parallel > total_items:
+        max_parallel = total_items
+    msg = "map_parallel (%s/%s - %s)" % (max_parallel, total_items, f)
+    if max_parallel > 100:
+        logging.warning("%s Starting many threads.", msg)
+
+    # Dictionary of results: index -> result.
+    results = {}
+    # Dictionary of exceptions: index -> exception info.
+    errors = {}
+
+    # The worker thread.
+    class Worker(threading.Thread):
+        def run(self):
+            # Keep running until we find an error, or the queue is empty.
+            while not errors:
+                try:
+                    # Get the next item from the queue.
+                    num, arg = queue.get(block=False)
+                    # Run the map.
+                    try:
+                        results[num] = f(arg)
+                    except Exception as e:
+                        errors[num] = sys.exc_info()
+                except six.moves.queue.Empty:
+                    break
+
+    # Create the threads.
+    threads = [Worker(name="map_parallel: %d" % i) for i in range(max_parallel)]
+    # We're going to try to start threads, we may not be succesfull.
+    started_threads, unstarted_threads = [], []
+    # Start the threads.
+    for t_i, t in enumerate(threads):
+        try:
+            t.start()
+        except Exception as e:
+            if _enforce_parallel:
+                # If there's trouble starting, may want to know about it.
+                raise
+            # We can run out of resources if we start too many threads.
+            logging.error("%s Cant start thread %s of %s, %d active: %s",
+                          msg, t_i, len(threads), threading.active_count(), e)
+            unstarted_threads.append(t)
+        else:
+            started_threads.append(t)
+
+    logging.info("%s Finished starting threads %d (%s failed)",
+                 msg, len(started_threads), len(unstarted_threads))
+
+    if not started_threads and unstarted_threads:
+        # If we weren't able to start any threads, for whatever reason,
+        # try doing a normal map instead of map_parallel.
+        logging.error("No threads were started, won't run in parallel")
+        results = []
+        while True:
+            try:
+                iter_i, item = queue.get()
+            except six.moves.queue.Empty:
+                break
+            else:
+                results.append(f(item))
+    else:
+        # Now wait for the threads, it's possible we weren't able to start all.
+        if unstarted_threads:
+            logging.error("%s Was not able to start all threads: %s - %s", msg,
+                          len(started_threads), len(unstarted_threads))
+        # Wait for the threads to finish.
+        [t.join() for t in started_threads]
+
+        if errors:
+            if len(errors) > 1:
+                logging.warning("%s multiple errors: %d:\n%s",
+                                msg, len(errors), errors)
+            # Just raise the first one.
+            item_i = min(errors.keys())
+            # exc_info returns the exception type, it's value and its traceback.
+            type, value, tb = errors[item_i]
+            # Print the original traceback
+            logging.info("%s exception on item %s/%s:\n%s", msg, item_i,
+                         total_items, "".join(traceback.format_tb(tb)))
+            # Get the completed values.
+            value.partial_results = []
+            for idx in range(item_i):
+                if idx in results:
+                    value.partial_results.append(results[idx])
+                else:
+                    break
+            # Raise the original exception.
+            raise value
+
+    return [results[i] for i in range(len(results))]
+
 def search_docket_alarm(auth_tuple, query_string, limit=10, result_order=None):
     """
     Args:
@@ -181,151 +290,105 @@ def search_docket_alarm(auth_tuple, query_string, limit=10, result_order=None):
         search_results = result['search_results']
         return search_results
 
-    # If the user specifies a limit larger than 50, we use the scrolling API, which allows us to get past the 50 result limit and access all results.
-    if int(limit) > 50:
+    # Determine how many results there are.
+    parameters = {
+        "login_token": authenticate(auth_tuple),
+        "q": query_string,
+        "limit": 1,
+    }
+    if result_order != None:
+        # Add results older
+        parameters["o"] = result_order
+    result = requests.get(endpoint, params=parameters,timeout=60).json()
+    # We store the maximum number of results from our API call above in a variable.
+    total_results =  result['count']
+    print("Total Results: %s"%total_results)
 
-        # We make API call #0. This is not an API call we use to return results, we just want to see what the maximum number of returned
-        # results are that we can access.
-        if result_order != None:
-            # Not passing an o (result order) parameter during our API call sorts the results by relevance. For any other method of sorting, we pass the o parameter
-            # with the kind of order we want to sort by.
-            parameters = {
-                "login_token": authenticate(auth_tuple),
-                "q": query_string,
-                "o": result_order,
-                "limit": 1,
-            }
-        else:
-            parameters = {
+    # A hard limit for the maximum number of iterations.
+    MAX_ITERATIONS = 10000
+    # Number of parralel chunks to iterate through. When using the scrolling
+    # API, data is split into a certain amount of chunks that we specify. Use
+    # the number of results divided by 2500. This is optimal. The scrolling
+    # API can only use up to 1023 chunks at once, so if our amount of chunks is
+    # above that, then we default to 1023 chunks.
+    num_parallel = min(max(5, math.ceil(total_results / 2500)), 1023)
+
+    # Create an array to store our scroll IDs, with one storage slot for each
+    # chunk. The scrolling API generates key with each a new batch of 50
+    # results. We pass that to the next API call for the next set of results.
+    scroll_ids = [None]*num_parallel
+
+    def do_one_scroll_index(idx):
+        print("   Scroll %d of %d Starting"%(idx, num_parallel))
+        # Make our real first API call for gathering results. Each chunk has its
+        # own first call. In the first call. Specify the scroll_parallel and the
+        # scroll_index to let the API know which chunk you are accessing.
+        parameters = {
             "login_token": authenticate(auth_tuple),
             "q": query_string,
-            "limit": 1,
+            "limit": 50,
+            "scroll_parallel": num_parallel,
+            "scroll_index": idx,
+        }
+        if result_order != None:
+            parameters["o"] = result_order
+
+        # Get results and convert from json to a python dict.
+        result = requests.get(endpoint, params=parameters, timeout=60).json()
+        if 'error' in result:
+            print("Error: %s"%result['error'])
+            return
+
+        # Store the first pass of results.
+        scroll_results = result['search_results']
+        if not scroll_results:
+            return scroll_results
+
+        # Store the scroll id for the next scroll. We use this on our next API
+        # call to get to return the next results.
+        scroll_id = result['scroll']
+
+        while True:
+            # For the next API calls, don't include the scroll_index and
+            # scroll_parralel parameters. Instead all subsequent API calls get
+            # a hashed scroll key as the 'scroll' parameter. This lets the API
+            # know that you are requesting a continuation of an earlier chunk.
+            parameters = {
+                "login_token": authenticate(auth_tuple),
+                "q": query_string,
+                "limit": 50,
+                "scroll": scroll_id,
             }
-
-        
-        # Here we set up our variables
-
-        # We get the result of our API call above. This call isn't for getting results, just for seeing how many results we can access.
-        result = requests.get(endpoint, params=parameters,timeout=60).json()
-
-        # We set a hard limit for the maximum number of iterations the function will make before quitting.
-        MAX_ITERATIONS = 10000
-
-        # We store the maximum number of results from our API call above in a variable.
-        amount_of_results =  result['count']
-
-        # Here we get the number of parralel chunks we can sort through. When using the scrolling API, data is split into a certain amount of chunks that we specify.
-        # We use the number of results divided by 2500. This is optimal. The scrolling API can only use up to 1023 chunks at once, so if our amount of chunks is above that,
-        # then we default to 1023 chunks.
-        num_parallel = math.ceil(amount_of_results / 2500) if math.ceil(amount_of_results/2500) <= 1023 else 1023
-
-        # We create an array to store our scroll IDs. We need one storage slot for every chunk. The scrolling API generates keys, each time we retrieve a new batch of 50 results
-        # on each chunk, the API returns a hash key that we can pass into our next API call to get the next set of results in order.
-        scroll_ids = [None]*num_parallel
-
-        # This is the list that we will append with all of our results. This will be returned at the end when it is populated.
-        all_results = []
-
-
-        
-        # Now we make our real first API call for gathering results. Each chunk has its own first call. In the first call, you specify the
-        # scroll_parallel and the scroll_index to let the API know which chunk you are accessing.
-        for scroll_index in range(num_parallel):
-            
             if result_order != None:
-                parameters = {
-                "login_token": authenticate(auth_tuple),
-                "q": query_string,
-                "o": result_order,
-                "limit": 50,
-                "scroll_parallel": num_parallel,
-                "scroll_index": scroll_index,
-            }
+                parameters["o"] = result_order
 
-            else:
-                parameters = {
-                "login_token": authenticate(auth_tuple),
-                "q": query_string,
-                "limit": 50,
-                "scroll_parallel": num_parallel,
-                "scroll_index": scroll_index,
-                }
+            # Make the API call, convert the results from json to a dictionary.
+            result = requests.get(endpoint, params=parameters,
+                                  timeout=60).json()
 
-            # We convert our results from json to a python dictionary and store the dictionary in a variable.
-            result = requests.get(endpoint, params=parameters,timeout=60).json()
-            
+            # With each loop, the returned results are added to scroll_results.
+            scroll_results += result['search_results']
+            print("   Scroll %d: Total Results %d" % (idx, len(scroll_results)))
 
-            if 'error' in result:
-                # print(result['error'])
-                pass
+            # Overwrite the prior scroll ID. The next loop will access the next
+            # 50 results when it looks for that value in the array.
+            scroll_id = result['scroll']
 
-            # We store each of our search results in each pass on each of our seperate chunks in the all_results list we created above.
-            all_results += result['search_results']
-
-            # We print the amount returned so the user can see that results are coming back and get a feel for how much longer the query will take.
-            print(len(all_results))
-
-            # We store the id for the next scroll in the array that holds on to scroll keys. We use this on our next API call to get to return the next results.
-            # Each of those will overwrite that slot in the array and then continue looping to gather all of the results.
-            scroll_ids[scroll_index] = result['scroll']
-        
-            # after each iteration, we check to see if the results are more than the amount the user specified they want to return.
-            if len(all_results) >= int(limit):
+            # Check if the results are more than the amount the user specified they want to return.
+            if not result['search_results'] or len(scroll_results) >= int(limit):
                 # If it reaches that limit, we return it.
-                return all_results
+                print("   Scroll %d of %d Completed"%(idx, num_parallel))
+                return scroll_results
 
-            scroll_ids[scroll_index] = result['scroll']
+    # Run the above function in a separate thread.
+    map_results = map_parallel(do_one_scroll_index, list(range(num_parallel)),
+                               max_parallel = max(20, num_parallel))
 
-
-        # This array has a slot for each chunk for the scrolling api. While the value is false, we continue. When a chunk stops producing results,
-        # we change the value to true and we use this to stop the loop for that particular chunk.
-        scroller_done = [False]*num_parallel
-
-        # We loop until we reach the manually set max
-        for i in range(MAX_ITERATIONS):
-            
-            # For each of our chunks...
-            for scroll_index in range(num_parallel):
-                
-                # We check to see if the chunk has no more results to return. If it does, we skip it.
-                if scroller_done[scroll_index]:
-                    continue
-
-                # For our second API call and on for each chunk, we no longer include the scroll_index and scroll_parralel parameters.
-                # Instead all subsequent API calls get a hashed scroll key as the 'scroll' parameter. This lets the API know that you are requesting a
-                # continuation of a chunk that was accessed earlier.
-                if result_order != None:
-                    parameters = {
-                        "login_token": authenticate(auth_tuple),
-                        "q": query_string,
-                        "o": result_order,
-                        "limit": 50,
-                        "scroll":scroll_ids[scroll_index],
-                    }
-
-                else:
-                    parameters = {
-                        "login_token": authenticate(auth_tuple),
-                        "q": query_string,
-                        "limit": 50,
-                        "scroll":scroll_ids[scroll_index],
-                        }
-                
-                # We make our API call, convert the results from json to a dictionary, and store the dictionary in a variable.
-                result = requests.get(endpoint, params=parameters,timeout=60).json()
-
-                # With each loop, the returned results are added to our all_results list that will be returned at the end.
-                all_results += result['search_results']
-
-                # We store the next scroll ID for each chunk in the index, overwriting the prior scroll ID. That way, the next loop will be able to access the next
-                # 50 results when it looks for that value in the array.
-                scroll_ids[scroll_index] = result['scroll']
-                
-            # If our number of returned results goes above what the user specified. We stop and return it.
-            # In the generate_spreadsheets.py file where this function is called, we slice the result to be the exact length that the user specified.
-            # When called on its own, it will return slightly more results than what the user specified.
-            if len(all_results) >= int(limit):
-                return all_results
+    # The above will provide a list of lists, unwrap them.
+    all_results = []
+    for res in map_results:
+        all_results += res
+    print("Completed Download")
     return all_results
                 
 
