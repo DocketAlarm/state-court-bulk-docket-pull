@@ -9,6 +9,8 @@ all of the files and organize them in appropriate folders on your computer.
 This application uses the [Docket Alarm API](https://www.docketalarm.com/api), 
 and you will need a Docket Alarm license to run it. 
 
+
+
 ## Quick Start Guide
 1. Populate a [this CSV template](https://drive.google.com/file/d/1_8i8GEO6GlW1cjtH2afluJXCWyCRP5DG/view?usp=sharing) with the dockets you would like to download. The template has three columns:
     1. The ```Name``` column is used to name the folders and filenames, use whatever text you would like to identify the docket.
@@ -22,6 +24,11 @@ and you will need a Docket Alarm license to run it.
 1. Follow the directions on screen. You will be prompted to choose between downloading JSON files, PDF files, or both.
 1. A file browser will prompt you to select the location of your input csv file.
 1. When your download is complete, a folder will open containing all of your downloaded files.
+
+## Screenshots
+![image](https://user-images.githubusercontent.com/671052/120815739-1cee4480-c51e-11eb-87ab-50599ff35a3d.png)
+![image](https://user-images.githubusercontent.com/671052/120815771-24ade900-c51e-11eb-886b-d507e6226995.png)
+
 
 ## For Windows Users
 - You can extract the zip file, and inside you will find ```run.bat``` and ```install-dependencies.bat```
